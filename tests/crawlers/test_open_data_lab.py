@@ -1,6 +1,6 @@
 import pytest
-from oslm_crawler.crawlers.open_data_lab import OpenDataLabCrawler
-from oslm_crawler.crawlers.crawl_utils import init_single_driver
+from oslm_analyst.crawlers.open_data_lab import OpenDataLabCrawler
+from oslm_analyst.crawlers.crawl_utils import init_single_driver
 
 
 @pytest.fixture(scope='class')

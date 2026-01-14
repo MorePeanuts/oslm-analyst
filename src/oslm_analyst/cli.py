@@ -3,26 +3,30 @@ from typer import Argument, Option
 from typing import Annotated, Literal
 from datetime import datetime
 
-app = typer.Typer()
+
+app = typer.Typer(name='OSLM-Analyst', help='Open-source large models data analyst.')
 
 
 def today() -> str:
     return str(datetime.today().date())
 
 
-@app.command()
+@app.command(help='Crawling data such as download counts of data/models on specified platforms.')
 def crawl(
     platform: Annotated[
         Literal['all', 'huggingface', 'modelscope', 'open-data-lab', 'baai'],
         Argument(help='Used to specify the platform from which data is to be crawled.'),
-    ] = 'all',
+    ] = 'huggingface',
     max_retry: Annotated[int, Option(help='Maximum number of retries on network error')] = 5,
 ):
     print(platform)
     print(max_retry)
 
 
-@app.command()
+@app.command(
+    help='Ranking calculation based on the open-source influence evaluation criteria of large '
+    'model technology for data obtained through web crawling.'
+)
 def rank(
     date: Annotated[
         str,
@@ -36,5 +40,5 @@ def rank(
 
 
 def main() -> None:
-    print('Hello from oslm-crawler!')
+    print('Hello from oslm-analyst!')
     app()

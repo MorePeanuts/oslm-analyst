@@ -1,0 +1,7 @@
+- org: Meta
+  type: Company
+  country: US
+  focus: [LLM, Multimodal, Open-source models]
+  hf_accounts:
+    - meta-llama
+    - facebook

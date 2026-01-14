@@ -1,0 +1,126 @@
+Ali:
+  - 'Qwen'
+  - 'Wan-AI'
+  - 'Alibaba-NLP'
+  - 'alibabasglab'
+  - 'alibaba-pai'
+AllenAI:
+  - 'allenai'
+Amazon:
+  - 'AmazonScience'
+  - 'aws-neuron'
+Anthropic:
+  - 'Anthropic'
+Apple:
+  - 'apple'
+BAAI:
+  - 'BAAI'
+  - 'FalgRelease'
+  - 'CofeAI'
+  - 'OmniGen2'
+  - 'RoboCOIN'
+Baichuan:
+  - 'baichuan-inc'
+Baidu:
+  - 'baidu'
+  - 'PaddlePaddle'
+  - 'ernie-research'
+BigScience:
+  - 'bigscience'
+ByteDance:
+  - 'ByteDance'
+  - 'bytedance-research'
+  - 'ByteDance-Seed'
+Cohere:
+  - 'CohereLabs'
+  - 'Cohere'
+DeepSeek:
+  - 'deepseek-ai'
+EleutherAI:
+  - 'EleutherAI'
+Google:
+  - 'google'
+  - 'google-bert'
+  - 'google-t5'
+  - 'deepmind'
+  - 'google-research-datasets'
+Huawei:
+  - 'huawei-noah'
+  - 'HWERI'
+HuggingFace:
+  - 'HuggingFaceFW'
+  - 'HuggingFaceTB'
+  - 'HuggingFaceH4'
+  - 'distilbert'
+  - 'open-r1'
+IBM:
+  - 'ibm-granite'
+  - 'ibm-research'
+  - 'ibm'
+Intel:
+  - 'Intel'
+  - 'IntelLabs'
+LAION:
+  - 'laion'
+LMSYS:
+  - 'lmsys'
+Meituan:
+  - 'meituan-longcat'
+  - 'meituan'
+Meta:
+  - 'meta-llama'
+  - 'facebook'
+Microsoft:
+  - 'microsoft'
+MiniMax:
+  - 'MiniMaxAI'
+MistralAI:
+  - 'mistralai'
+MLFoundations:
+  - 'mlfoundations'
+Moonshot:
+  - 'moonshotai'
+NousResearch:
+  - 'NousResearch'
+Nvidia:
+  - 'nvidia'
+OpenAI:
+  - 'openai'
+OpenBMB:
+  - 'openbmb'
+PrincetonNLP:
+  - 'princeton-nlp'
+Salesforce:
+  - 'Salesforce'
+ShanghaiAILab:
+  - 'OpenGVLab'
+  - 'internlm'
+  - 'Alpha-VLLM'
+  - 'AI4Chem'
+  - 'OpenDriveLab'
+  - 'OpenDILabCommunity'
+  - 'OpenMEDLab'
+  - 'openmmlab'
+  - 'opendatalab'
+  - 'OpenScienceLab'
+StabilityAI:
+  - 'stabilityai'
+StanfordNLP:
+  - 'stanfordnlp'
+Tencent:
+  - 'tencent'
+  - 'TencentARC'
+  - 'Tencent-Hunyuan'
+TII:
+  - 'tiiuae'
+Together:
+  - 'togethercomputer'
+UKPLab:
+  - 'sentence-transformers'
+  - 'UKPLab'
+Xiaomi:
+  - 'XiaomiMiMo'
+Zhipu:
+  - 'zai-org'
+01-AI:
+  - '01-ai'

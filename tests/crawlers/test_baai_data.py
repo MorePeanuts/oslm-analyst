@@ -1,4 +1,4 @@
-from oslm_crawler.crawlers.baai_data import BAAIDataCrawler, BAAIDataInfo
+from oslm_analyst.crawlers.baai_data import BAAIDataCrawler, BAAIDataInfo
 
 
 def test_baai_data_page():
