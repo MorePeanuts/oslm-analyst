@@ -8,6 +8,7 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+  "datasets>=4.4.2",
   "huggingface-hub>=1.2.1",
   "jsonlines>=4.0.0",
   "loguru>=0.7.3",
@@ -15,6 +16,7 @@ dependencies = [
   "pandas>=2.3.3",
   "pytest>=8.4.2",
   "selenium>=4.38.0",
+  "socksio>=1.0.0",
   "tenacity>=9.1.2",
   "typer>=0.20.0",
   "webdriver-manager>=4.0.2",

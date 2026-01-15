@@ -5,3 +5,17 @@
   hf_accounts:
     - meta-llama
     - facebook
+
+- org: BAAI
+  type: Non-Profit
+  country: CN
+  focus: [Multimodal, Open-source, Embodied Intelligence]
+  hf_accounts:
+    - BAAI
+    - FalgRelease
+    - CofeAI
+    - OmniGen2
+    - RoboCOIN
+  ms_accounts:
+    - BAAI
+    - RoboCOIN
