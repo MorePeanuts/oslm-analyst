@@ -31,13 +31,16 @@ class HfInfo:
 
 
 class HfCrawler:
-    def __init__(self, token: str | bool = False, endpoint='https://huggingface.co', max_retry=5):
+    def __init__(
+        self, token: str | bool | None = None, endpoint='https://huggingface.co', max_retry=5
+    ):
         self.endpoint = endpoint.rstrip('/')
         self.api = HfApi(endpoint=self.endpoint, token=token)
+        # WARNING: retry if not exception type!
         self.retrier = Retrying(
             reraise=True,
-            retry=retry_if_not_exception_type(ValueError),
-            wait=wait_exponential(multiplier=2, min=30, max=360),
+            retry=retry_if_not_exception_type((ValueError, StopIteration)),
+            wait=wait_exponential(multiplier=1, min=1, max=5),
             stop=stop_after_attempt(max_retry),
         )
 
@@ -46,7 +49,7 @@ class HfCrawler:
         repo: str,
         name: str | None,
         category: Literal['model', 'dataset'] = 'model',
-    ) -> list[HfInfo]:
+    ) -> Iterator[HfInfo]:
         date_crawl = today()
         match category:
             case 'model':
@@ -59,59 +62,51 @@ class HfCrawler:
                 info = self._fetch_from_identifier(identifier, category)
                 disc, msg = self._fetch_discussions_count(identifier)
                 link = base_link + '/' + identifier
-                return [
-                    HfInfo(
-                        repo,
-                        name,
-                        category,
-                        date_crawl,
-                        info.downloads,
-                        info.likes,
-                        disc,
-                        msg,
-                        link,
-                    )
-                ]
+                yield HfInfo(
+                    repo,
+                    name,
+                    category,
+                    date_crawl,
+                    info.downloads,
+                    info.likes,
+                    disc,
+                    msg,
+                    link,
+                )
             except Exception:
                 error = traceback.format_exc()
-                return [HfInfo(repo, name, category, date_crawl, error=error)]
+                yield HfInfo(repo, name, category, date_crawl, error=error)
         else:
             pair = self._fetch_from_repo(repo, category)
-            res = []
             for info, error in pair:
                 if info is None:
                     # BUG:Extract the model/dataset name from the error message
-                    res.append(HfInfo(repo, '', category, date_crawl, error=error))
+                    yield HfInfo(repo, '', category, date_crawl, error=error)
                 else:
                     identifier = info.id
                     try:
                         disc, msg = self._fetch_discussions_count(identifier)
                         link = base_link + '/' + identifier
-                        res.append(
-                            HfInfo(
-                                repo,
-                                identifier.split('/')[-1],
-                                category,
-                                date_crawl,
-                                info.downloads,
-                                info.likes,
-                                disc,
-                                msg,
-                                link,
-                            )
+                        yield HfInfo(
+                            repo,
+                            identifier.split('/')[-1],
+                            category,
+                            date_crawl,
+                            info.downloads,
+                            info.likes,
+                            disc,
+                            msg,
+                            link,
                         )
                     except Exception:
                         error = traceback.format_exc()
-                        res.append(
-                            HfInfo(
-                                repo,
-                                identifier.split('/')[-1],
-                                category,
-                                date_crawl,
-                                error=error,
-                            )
+                        yield HfInfo(
+                            repo,
+                            identifier.split('/')[-1],
+                            category,
+                            date_crawl,
+                            error=error,
                         )
-            return res
 
     def _fetch_from_identifier(
         self, identifier, category: Literal['model', 'dataset']

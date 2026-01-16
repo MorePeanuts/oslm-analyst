@@ -19,3 +19,12 @@
   ms_accounts:
     - BAAI
     - RoboCOIN
+
+- org: Baidu
+  type: Company
+  country: CN
+  focus: [LLM]
+  hf_accounts:
+    - baidu
+    - PaddlePaddle
+    - ernie-research
