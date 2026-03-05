@@ -1,13 +1,14 @@
+import json
 import traceback
 from loguru import logger
 from typing import Literal
 from collections.abc import Iterator
-from dataclasses import dataclass, field
-from huggingface_hub import HfApi, ModelCard
+from dataclasses import dataclass, field, asdict
+from huggingface_hub import HfApi, ModelCard, DatasetCard
 from huggingface_hub.hf_api import ModelInfo, DatasetInfo
 from tenacity import (
     Retrying,
-    retry,
+    RetryError,
     wait_exponential,
     stop_after_attempt,
     retry_if_not_exception_type,
@@ -27,7 +28,31 @@ class HfInfo:
     discussions: int | None = field(default=None)
     discussion_msg: int | None = field(default=None)
     link: str | None = field(default=None)
+    readme: str | None = field(default=None)
     error: str | None = field(default=None)
+
+    def format(self, readme: bool = False) -> str:
+        if self.error is not None:
+            return json.dumps(
+                {
+                    'repo': self.repo,
+                    'name': self.name,
+                    'category': self.category,
+                    'date_crawl': self.date_crawl,
+                    'error': self.error,
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        else:
+            obj = asdict(self)
+            obj.pop('error')
+            if not readme:
+                obj.pop('readme')
+            return json.dumps(obj, ensure_ascii=False, indent=2)
+
+    def __repr__(self):
+        return self.format()
 
 
 class HfCrawler:
@@ -36,9 +61,9 @@ class HfCrawler:
     ):
         self.endpoint = endpoint.rstrip('/')
         self.api = HfApi(endpoint=self.endpoint, token=token)
-        # WARNING: retry if not exception type!
+        # reraise=False: raise RetryError when max retry exceeded
         self.retrier = Retrying(
-            reraise=True,
+            reraise=False,
             retry=retry_if_not_exception_type((ValueError, StopIteration)),
             wait=wait_exponential(multiplier=1, min=1, max=5),
             stop=stop_after_attempt(max_retry),
@@ -51,16 +76,20 @@ class HfCrawler:
         category: Literal['model', 'dataset'] = 'model',
     ) -> Iterator[HfInfo]:
         date_crawl = today()
+
         match category:
             case 'model':
                 base_link = self.endpoint
             case 'dataset':
                 base_link = self.endpoint + '/datasets'
+
         if name is not None:
+            # Crawl repo/name single data.
             identifier = repo + '/' + name
             try:
                 info = self._fetch_from_identifier(identifier, category)
                 disc, msg = self._fetch_discussions_count(identifier)
+                readme = self._fetch_readme_content(identifier, category)
                 link = base_link + '/' + identifier
                 yield HfInfo(
                     repo,
@@ -72,20 +101,23 @@ class HfCrawler:
                     disc,
                     msg,
                     link,
+                    readme,
                 )
             except Exception:
                 error = traceback.format_exc()
                 yield HfInfo(repo, name, category, date_crawl, error=error)
         else:
+            # Crawl all category type data from the current repo.
             pair = self._fetch_from_repo(repo, category)
             for info, error in pair:
                 if info is None:
-                    # BUG:Extract the model/dataset name from the error message
+                    # TODO:Extract the model/dataset name from the error message
                     yield HfInfo(repo, '', category, date_crawl, error=error)
                 else:
                     identifier = info.id
                     try:
                         disc, msg = self._fetch_discussions_count(identifier)
+                        readme = self._fetch_readme_content(identifier, category)
                         link = base_link + '/' + identifier
                         yield HfInfo(
                             repo,
@@ -97,6 +129,7 @@ class HfCrawler:
                             disc,
                             msg,
                             link,
+                            readme,
                         )
                     except Exception:
                         error = traceback.format_exc()
@@ -117,6 +150,11 @@ class HfCrawler:
                     return self.retrier(self.api.model_info, identifier)
                 case 'dataset':
                     return self.retrier(self.api.dataset_info, identifier)
+        except RetryError:
+            logger.exception(
+                f'Max retry exceeded when fetch {category} information from {identifier}.'
+            )
+            raise
         except Exception:
             logger.exception(f'Exception when fetch {category} information from {identifier}.')
             raise
@@ -136,10 +174,15 @@ class HfCrawler:
                 yield info, None
             except StopIteration:
                 break
-            except Exception:
-                logger.exception(f'Exception when fetch from repo {repo}')
+            except RetryError:
+                # WARNING: After the current info exceeds the retry limit, this repo will not
+                # proceed with subsequent fetches.
+                logger.exception(
+                    f'Max retry exceeded when fetch from repo {repo}, stopping iteration'
+                )
                 error = traceback.format_exc()
                 yield None, error
+                break
 
     def _fetch_discussions_count(self, identifier) -> tuple[int, int]:
         discussions = self.api.get_repo_discussions(identifier)
@@ -156,6 +199,23 @@ class HfCrawler:
                 total_msg += len(discussion_details.events)
             except StopIteration:
                 return total_count, total_msg
-            except Exception:
-                logger.exception(f'Exception when fetch discussions from {identifier}')
-                raise
+            except RetryError:
+                logger.exception(
+                    f'Max retry exceeded when fetch discussions from {identifier}, stopping iteration'
+                )
+                return total_count, total_msg
+
+    def _fetch_readme_content(self, identifier, category: Literal['model', 'dataset']) -> str:
+        try:
+            match category:
+                case 'model':
+                    readme = self.retrier(ModelCard.load, identifier)
+                case 'dataset':
+                    readme = self.retrier(DatasetCard.load, identifier)
+            return str(readme)
+        except RetryError:
+            logger.exception(f'Max retry exceeded when fetch readme content from {identifier}')
+            return ''
+        except Exception:
+            logger.exception(f'Exception when fetch readme content from {identifier}')
+            return ''

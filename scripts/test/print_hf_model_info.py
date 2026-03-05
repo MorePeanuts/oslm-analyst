@@ -1,3 +1,8 @@
+"""
+This script is used to print the output format and content of some commonly used functions in the
+huggingface_hub library.
+"""
+
 from pprint import pprint
 from huggingface_hub import HfApi, ModelCard
 
@@ -63,7 +68,6 @@ pprint(discussions[0])
 dis_details = api.get_discussion_details(model.id, 17)
 pprint(len(dis_details.events))
 
-# 3
-
 model_card = ModelCard.load(model.id)
 print(model_card)
+print(type(model_card))

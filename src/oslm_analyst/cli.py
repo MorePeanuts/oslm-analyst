@@ -168,8 +168,11 @@ def crawl(
             raise NotImplementedError()
 
 
-@app.command(help='Process the raw data obtained from the crawler.')
+@app.command()
 def process():
+    """
+    Process the raw data obtained from the crawler.
+    """
     raise NotImplementedError()
 
 
@@ -188,6 +191,14 @@ def rank(
     model technology for data obtained through web crawling.
     """
     print(date)
+
+
+@app.command()
+def report():
+    """
+    Generate data analysis report.
+    """
+    raise NotImplementedError()
 
 
 def main() -> None:

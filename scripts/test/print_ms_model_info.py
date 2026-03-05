@@ -1,3 +1,8 @@
+"""
+This script is used to print the output format and content of some commonly used functions in the
+modelscope.hub library.
+"""
+
 from pprint import pprint
 from modelscope.hub.api import HubApi
 

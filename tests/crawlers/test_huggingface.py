@@ -1,5 +1,6 @@
 from oslm_analyst.crawlers.huggingface import HfCrawler, HfInfo
 from pytest import fixture
+from loguru import logger
 
 
 @fixture
@@ -12,9 +13,10 @@ def test_hf_crawl_fetch_id(hf_crawler: HfCrawler):
     models = list(models)
     assert len(models) == 1
     assert isinstance(models[0], HfInfo)
-    print(models[0])
+    logger.info('model info:\n' + models[0].format())
 
 
 def test_hf_crawl_fetch_repo(hf_crawler: HfCrawler):
     for model in hf_crawler.fetch('deepseek-ai', None, 'model'):
         assert isinstance(model, HfInfo)
+        logger.info('model info:\n' + model.format())

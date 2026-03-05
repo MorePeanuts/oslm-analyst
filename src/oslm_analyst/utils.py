@@ -11,7 +11,7 @@ def today() -> str:
 
 
 def now() -> str:
-    return datetime.now().strftime('%Y%M%D_%h%m%s')
+    return datetime.now().strftime('%y%m%d_%H%M%S')
 
 
 def parse_commas_separated_params(param: str) -> list[str]:
