@@ -135,7 +135,11 @@ class MsCrawler:
             try:
                 infos = func(repo, page_number=page_number, page_size=page_size)
                 for info in infos[key]:
-                    yield Info(**info), None
+                    res = Info(author=repo, **info)
+                    res.readme_content = self._fetch_readme_content(
+                        f'{res.author}/{res.name}', category
+                    )
+                    yield res, None
             except Exception:
                 logger.exception(
                     f'Exception when crawl {repo} ({category}) at page {page_number} (page_size={page_size})'
@@ -155,3 +159,10 @@ class MsCrawler:
                 return self.models_count.get(repo)
             case 'dataset':
                 return self.datasets_count.get(repo)
+
+    def _fetch_readme_content(self, identifier, category: Literal['model', 'dataset']) -> str:
+        info = self.api.repo_info(identifier, repo_type=category)
+        if isinstance(info.readme_content, str):
+            return info.readme_content
+        else:
+            return ''

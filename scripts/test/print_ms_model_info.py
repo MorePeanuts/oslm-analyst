@@ -20,8 +20,10 @@ print(datasets.keys())
 print('Moonshot total datasets:', datasets['total_count'])
 
 # first model
-model_info = ModelInfo(**models['Models'][0])
+model_info = ModelInfo(author='deepseek-ai', **models['Models'][0])
 pprint(model_info)
+readme = api.model_info(f'{model_info.author}/{model_info.name}').readme_content
+print(readme)
 
 # first dataset
 dataset_info = DatasetInfo(**datasets['datasets'][0])
@@ -35,7 +37,7 @@ print('author:', model_info.author)
 print('downloads:', model_info.downloads)
 print('likes:', model_info.likes)
 print('description:', model_info.description)
-# print('readme:\n', model_info.readme_content)
+print('readme:\n', model_info.readme_content)
 print('tags:\n', model_info.tags)
 
 # equal to:

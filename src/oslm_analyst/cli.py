@@ -6,7 +6,7 @@ from loguru import logger
 from pathlib import Path
 from pprint import pformat
 from .utils import today, parse_commas_separated_params, OrgInfo, Source
-from .crawl import run_hf_crawl_pipeline
+from .crawl import run_hf_crawl_pipeline, run_ms_crawl_pipeline
 
 
 app = typer.Typer(name='OSLM-Analyst', help='Open-source large models data analyst.')
@@ -155,21 +155,26 @@ def crawl(
     outp.mkdir(parents=True, exist_ok=True)
     logger.info(f'Output path:\n{outp}')
 
-    # match platform:
-    #     case 'huggingface':
-    #         run_hf_crawl_pipeline(
-    #             inp_src=filtered_inp_src,
-    #             out_path=outp,
-    #             max_retry=max_retry,
-    #             token=token,
-    #             endpoint=endpoint,
-    #         )
-    #     case 'modelscope':
-    #         raise NotImplementedError()
-    #     case 'open-datalab':
-    #         raise NotImplementedError()
-    #     case 'baai-datahub':
-    #         raise NotImplementedError()
+    match platform:
+        case 'huggingface':
+            run_hf_crawl_pipeline(
+                inp_src=filtered_inp_src,
+                out_path=outp,
+                max_retry=max_retry,
+                token=token,
+                endpoint=endpoint,
+            )
+        case 'modelscope':
+            run_ms_crawl_pipeline(
+                inp_src=filtered_inp_src,
+                out_path=outp,
+                max_retry=max_retry,
+                endpoint=endpoint,
+            )
+        case 'open-datalab':
+            raise NotImplementedError()
+        case 'baai-datahub':
+            raise NotImplementedError()
 
 
 @app.command()
