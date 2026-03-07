@@ -5,6 +5,7 @@
   hf_accounts:
     - meta-llama
     - facebook
+    - FacebookAI
 
 - org: BAAI
   type: Non-Profit
@@ -12,7 +13,7 @@
   focus: [Multimodal, Open-source, Embodied Intelligence]
   hf_accounts:
     - BAAI
-    - FalgRelease
+    - FlagRelease
     - CofeAI
     - OmniGen2
     - RoboCOIN
@@ -28,3 +29,272 @@
     - baidu
     - PaddlePaddle
     - ernie-research
+  ms_accounts:
+    - PaddlePaddle
+
+- org: ShanghaiAILab
+  type: Research Lab
+  country: CN
+  focus: [Multimodal, Autonomous Driving, Medical AI]
+  hf_accounts:
+    - OpenGVLab
+    - internlm
+    - Alpha-VLLM
+    - AI4Chem
+    - OpenDriveLab
+    - OpenDILabCommunity
+    - OpenMEDLab
+    - openmmlab
+    - opendatalab
+    - OpenScienceLab
+  ms_accounts:
+    - OpenGVLab
+    - Shanghai_AI_Laboratory
+    - OpenDataLab
+
+- org: Baichuan
+  type: Company
+  country: CN
+  focus: [LLM]
+  hf_accounts:
+    - baichuan-inc
+  ms_accounts:
+    - baichuan-inc
+
+- org: Zhipu
+  type: Company
+  country: CN
+  focus: [LLM, Multimodal]
+  hf_accounts:
+    - THUDM
+    - zai-org
+    - THUDM-HF-SPACE
+  ms_accounts:
+    - ZhipuAI
+
+- org: Ali
+  type: Company
+  country: CN
+  focus: [LLM, Multimodal, Speech]
+  hf_accounts:
+    - Qwen
+    - Alibaba-NLP
+    - alibabasglab
+    - alibaba-pai
+    - Wan-AI
+  ms_accounts:
+    - Qwen
+    - iic
+
+- org: Huawei
+  type: Company
+  country: CN
+  focus: [LLM, Computer Vision]
+  hf_accounts:
+    - huawei-noah
+    - HWERI
+
+- org: LMSYS
+  type: Research Lab
+  country: US
+  focus: [LLM, Evaluation]
+  hf_accounts:
+    - lmsys
+
+- org: Falcon
+  type: Research Lab
+  country: UAE
+  focus: [LLM]
+  hf_accounts:
+    - tiiuae
+
+- org: EleutherAI
+  type: Non-Profit
+  country: US
+  focus: [LLM, Open-source]
+  hf_accounts:
+    - EleutherAI
+
+- org: Google
+  type: Company
+  country: US
+  focus: [LLM, Multimodal, Research]
+  hf_accounts:
+    - google
+    - google-bert
+    - google-t5
+    - deepmind
+    - google-research-datasets
+
+- org: UKP Lab
+  type: University
+  country: DE
+  focus: [NLP, Sentence Embeddings]
+  hf_accounts:
+    - sentence-transformers
+    - UKPLab
+
+- org: Microsoft
+  type: Company
+  country: US
+  focus: [LLM, Multimodal, Code]
+  hf_accounts:
+    - microsoft
+
+- org: OpenAI
+  type: Company
+  country: US
+  focus: [LLM, Multimodal, AGI]
+  hf_accounts:
+    - openai
+
+- org: HuggingFace
+  type: Company
+  country: US
+  focus: [LLM, Open-source, Infrastructure]
+  hf_accounts:
+    - distilbert
+    - open-r1
+    - HuggingFaceTB
+    - HuggingFaceFW
+    - HuggingFaceH4
+
+- org: Princeton NLP
+  type: University
+  country: US
+  focus: [NLP, LLM]
+  hf_accounts:
+    - princeton-nlp
+
+- org: Deepseek
+  type: Company
+  country: CN
+  focus: [LLM, Code, Reasoning]
+  hf_accounts:
+    - deepseek-ai
+  ms_accounts:
+    - deepseek-ai
+
+- org: OpenBMB
+  type: Non-Profit
+  country: CN
+  focus: [LLM, Open-source]
+  hf_accounts:
+    - openbmb
+  ms_accounts:
+    - OpenBMB
+
+- org: 01-AI
+  type: Company
+  country: CN
+  focus: [LLM]
+  hf_accounts:
+    - 01-ai
+  ms_accounts:
+    - 01ai
+
+- org: Nvidia
+  type: Company
+  country: US
+  focus: [LLM, Multimodal, Infrastructure]
+  hf_accounts:
+    - nvidia
+
+- org: Ai2
+  type: Non-Profit
+  country: US
+  focus: [LLM, Open-source, Research]
+  hf_accounts:
+    - allenai
+
+- org: Apple
+  type: Company
+  country: US
+  focus: [Multimodal, On-device AI]
+  hf_accounts:
+    - apple
+
+- org: Tencent
+  type: Company
+  country: CN
+  focus: [LLM, Multimodal, Video Generation]
+  hf_accounts:
+    - tencent
+    - TencentARC
+    - Tencent-Hunyuan
+  ms_accounts:
+    - tencent-community
+    - Tencent-YouTu-Research
+    - TencentARC
+    - TencentBAC
+
+- org: ByteDance
+  type: Company
+  country: CN
+  focus: [LLM, Multimodal, Video Generation]
+  hf_accounts:
+    - ByteDance
+    - bytedance-research
+    - ByteDance-Seed
+  ms_accounts:
+    - ByteDance
+    - bytedance-research
+    - ByteDance-Seed
+    - BytedanceDouyinContent
+
+- org: MistralAI
+  type: Company
+  country: FR
+  focus: [LLM, Open-source]
+  hf_accounts:
+    - mistralai
+
+- org: StanfordNLP
+  type: University
+  country: US
+  focus: [NLP, Research]
+  hf_accounts:
+    - stanfordnlp
+
+- org: Moonshot
+  type: Company
+  country: CN
+  focus: [LLM]
+  hf_accounts:
+    - moonshotai
+  ms_accounts:
+    - moonshotai
+
+- org: MLFoundations
+  type: Research Lab
+  country: US
+  focus: [Multimodal, Open-source]
+  hf_accounts:
+    - mlfoundations
+
+- org: Salesforce
+  type: Company
+  country: US
+  focus: [LLM, Multimodal]
+  hf_accounts:
+    - Salesforce
+
+- org: Meituan
+  type: Company
+  country: CN
+  focus: [LLM]
+  hf_accounts:
+    - meituan-longcat
+    - meituan
+  ms_accounts:
+    - meituan-longcat
+    - meituan
+
+- org: Xiaomi
+  type: Company
+  country: CN
+  focus: [LLM, On-device AI]
+  hf_accounts:
+    - XiaomiMiMo
+  ms_accounts:
+    - XiaomiMiMo
