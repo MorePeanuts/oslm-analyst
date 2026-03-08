@@ -103,18 +103,19 @@ def crawl(
     inp_src: list[Source] = []
     if Path(target).exists():
         target_path = Path(target)
-        # BUG: error when target_path is a directory
-        org_infos = OrgInfo.build_org_info_list_from_yaml(target_path)
-        repo_org_map = OrgInfo.build_repo_org_map(org_infos, platform)
         if target_path.is_dir():
             # target: recover from HTTP error
-            # BUG:
+            org_infos = OrgInfo.build_org_info_list_from_yaml(
+                Path(__file__).parents[2] / 'config/orgs.yaml'
+            )
+            repo_org_map = OrgInfo.build_repo_org_map(org_infos, platform)
             inp_src.extend(
                 Source.build_source_list_from_error(target_path, platform, category, repo_org_map)
             )
             outp = Path(target)
         else:
             # target: orgs.yaml -> list
+            org_infos = OrgInfo.build_org_info_list_from_yaml(target_path)
             inp_src.extend(
                 Source.build_source_list_from_org_info_list(org_infos, platform, category)
             )
