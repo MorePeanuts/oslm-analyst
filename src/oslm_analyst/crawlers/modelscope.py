@@ -153,12 +153,19 @@ class MsCrawler:
         info = self.api.repo_info(identifier, repo_type=category)
         return info
 
-    def get_total_count(self, repo, category: Literal['model', 'dataset']) -> int | None:
-        match category:
-            case 'model':
-                return self.models_count.get(repo)
-            case 'dataset':
-                return self.datasets_count.get(repo)
+    def fetch_num_of(self, repo, category: Literal['models', 'datasets']) -> int | None:
+        if category == 'models':
+            num = self.models_count.get(repo)
+            if num is None:
+                infos = self.api.list_models(repo)
+                num = infos['TotalCount']
+            return num
+        else:
+            num = self.datasets_count.get(repo)
+            if num is None:
+                infos = self.api.list_datasets(repo)
+                num = infos['total_count']
+            return num
 
     def _fetch_readme_content(self, identifier, category: Literal['model', 'dataset']) -> str:
         info = self.api.repo_info(identifier, repo_type=category)

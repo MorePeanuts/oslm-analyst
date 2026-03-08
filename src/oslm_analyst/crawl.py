@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import NamedTuple, Literal
 from dataclasses import asdict
 from loguru import logger
+from tqdm import tqdm
 from .crawlers.huggingface import HfCrawler
 from .utils import Source
 
@@ -33,20 +34,32 @@ def run_hf_crawl_pipeline(
     logger.info(f'Huggingface pipeline error path: {err_path}')
 
     total_errors = 0
+    logger.info('Calculate total records...')
+    total = 0
+    for src in inp_src:
+        if src.name is not None:
+            total += 1
+        else:
+            total += crawler.fetch_num_of(src.repo, src.category + 's')  # type: ignore
+    pbar = tqdm(total=total)
 
     with (
         jsonlines.open(outp_path, 'a', flush=True) as out_writer,
         jsonlines.open(err_path, 'w', flush=True) as err_writer,
     ):
         for src in inp_src:
+            pbar.set_description(f'crawling {src.category} from {src.repo}')
             for info in crawler.fetch(src.repo, src.name, src.category):  # type: ignore
+                pbar.update(1)
                 logger.trace(f'fetch: {info}')
                 if info.error is not None:
                     total_errors += 1
+                    pbar.write(f'Error when fetch {info}')
                     err_writer.write(asdict(info))
                 else:
                     out_writer.write(asdict(info))
 
+    pbar.close()
     if total_errors == 0:
         err_path.unlink()
 
@@ -71,19 +84,31 @@ def run_ms_crawl_pipeline(
     logger.info(f'Modelscope pipeline error path: {err_path}')
 
     total_errors = 0
+    logger.info('Calculate total records...')
+    total = 0
+    for src in inp_src:
+        if src.name is not None:
+            total += 1
+        else:
+            total += crawler.fetch_num_of(src.repo, src.category + 's')  # type: ignore
+    pbar = tqdm(total=total)
 
     with (
         jsonlines.open(outp_path, 'a', flush=True) as out_writer,
         jsonlines.open(err_path, 'w', flush=True) as err_writer,
     ):
         for src in inp_src:
+            pbar.set_description(f'crawling {src.category} data from {src.repo}')
             for info in crawler.fetch(src.repo, src.name, src.category):  # type: ignore
+                pbar.update(1)
                 logger.trace(f'fetch: {info}')
                 if info.error is not None:
                     total_errors += 1
+                    pbar.write(f'Error when fetch {info}')
                     err_writer.write(asdict(info))
                 else:
                     out_writer.write(asdict(info))
 
+    pbar.close()
     if total_errors == 0:
         err_path.unlink()

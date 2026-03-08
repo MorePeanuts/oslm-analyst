@@ -71,3 +71,17 @@ pprint(len(dis_details.events))
 model_card = ModelCard.load(model.id)
 print(model_card)
 print(type(model_card))
+
+org = api.get_organization_overview('BAAI')
+pprint(org)
+# Organization(avatar_url='https://cdn-avatars.huggingface.co/v1/production/uploads/1664511063789-632c234f42c386ebd2710434.png',
+#              name='BAAI',
+#              fullname='Beijing Academy of Artificial Intelligence',
+#              details=None,
+#              is_verified=False,
+#              is_following=True,
+#              num_users=103,
+#              num_models=188,
+#              num_spaces=24,
+#              num_datasets=126,
+#              num_followers=3398)

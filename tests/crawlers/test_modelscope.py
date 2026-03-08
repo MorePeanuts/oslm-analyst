@@ -23,6 +23,6 @@ def test_ms_crawl_fetch_repo(ms_crawler: MsCrawler):
         assert isinstance(model, MsInfo)
         count += 1
         logger.info('model info:\n' + model.format())
-    total_count = ms_crawler.get_total_count('deepseek-ai', 'model')
+    total_count = ms_crawler.fetch_num_of('deepseek-ai', 'model')
     assert isinstance(total_count, int), f'type of total_count is {type(total_count)}'
     assert count == total_count
