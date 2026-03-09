@@ -30,6 +30,9 @@ class HfInfo:
     link: str | None = field(default=None)
     readme: str | None = field(default=None)
     error: str | None = field(default=None)
+    modality: Literal['language'] | None = field(default=None)
+    lifecycle: Literal['pre-training'] | None = field(default=None)
+    valid: bool | None = field(default=None)
 
     def format(self, readme: bool = False) -> str:
         if self.error is not None:
@@ -53,6 +56,32 @@ class HfInfo:
 
     def __repr__(self):
         return self.format()
+
+    def to_dict(self, type: Literal['error', 'config', 'output']) -> dict:
+        obj = asdict(self)
+        obj.pop('category')
+        if self.category == 'model':
+            obj.pop('lifecycle')
+        match type:
+            case 'error':
+                return {
+                    'repo': self.repo,
+                    'name': self.name,
+                    'category': self.category,
+                    'date_crawl': self.date_crawl,
+                    'error': self.error,
+                }
+            case 'config':
+                obj.pop('date_crawl')
+                obj.pop('downloads_last_month')
+                obj.pop('likes')
+                obj.pop('discussions')
+                obj.pop('discussion_msg')
+                obj.pop('error')
+            case 'output':
+                obj.pop('readme')
+                obj.pop('error')
+        return obj
 
 
 class HfCrawler:

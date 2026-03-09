@@ -19,7 +19,6 @@ def run_hf_crawl_pipeline(
     """
     run
     """
-    # TODO:not complete
     if len(inp_src) == 0:
         return
     kwargs = {'max_retry': max_retry}
@@ -30,6 +29,8 @@ def run_hf_crawl_pipeline(
 
     outp_path = out_path / f'raw_{inp_src[0].category}_data.jsonl'
     err_path = out_path / f'err_{inp_src[0].category}_data.jsonl'
+    # TODO: temp solution for persistent information
+    conf_path = Path(__file__).parents[2] / 'config/hf_config.jsonl'
     logger.info(f'Huggingface pipeline output path: {outp_path}')
     logger.info(f'Huggingface pipeline error path: {err_path}')
 
@@ -46,6 +47,7 @@ def run_hf_crawl_pipeline(
     with (
         jsonlines.open(outp_path, 'a', flush=True) as out_writer,
         jsonlines.open(err_path, 'w', flush=True) as err_writer,
+        jsonlines.open(conf_path, 'w', flush=True) as conf_writer,
     ):
         for src in inp_src:
             pbar.set_description(f'crawling {src.category} from {src.repo}')
@@ -55,9 +57,10 @@ def run_hf_crawl_pipeline(
                 if info.error is not None:
                     total_errors += 1
                     pbar.write(f'Error when fetch {info}')
-                    err_writer.write(asdict(info))
+                    err_writer.write(info.to_dict('error'))
                 else:
-                    out_writer.write(asdict(info))
+                    out_writer.write(info.to_dict('output'))
+                    conf_writer.write(info.to_dict('config'))
 
     pbar.close()
     if total_errors == 0:
@@ -80,6 +83,8 @@ def run_ms_crawl_pipeline(
 
     outp_path = out_path / f'raw_{inp_src[0].category}_data.json'
     err_path = out_path / f'err_{inp_src[0].category}_data.json'
+    # TODO: temp solution for persistent information
+    conf_path = Path(__file__).parents[2] / 'config/ms_config.jsonl'
     logger.info(f'Modelscope pipeline output path: {outp_path}')
     logger.info(f'Modelscope pipeline error path: {err_path}')
 
@@ -96,6 +101,7 @@ def run_ms_crawl_pipeline(
     with (
         jsonlines.open(outp_path, 'a', flush=True) as out_writer,
         jsonlines.open(err_path, 'w', flush=True) as err_writer,
+        jsonlines.open(conf_path, 'w', flush=True) as conf_writer,
     ):
         for src in inp_src:
             pbar.set_description(f'crawling {src.category} data from {src.repo}')
@@ -105,9 +111,10 @@ def run_ms_crawl_pipeline(
                 if info.error is not None:
                     total_errors += 1
                     pbar.write(f'Error when fetch {info}')
-                    err_writer.write(asdict(info))
+                    err_writer.write(info.to_dict('error'))
                 else:
-                    out_writer.write(asdict(info))
+                    out_writer.write(info.to_dict('output'))
+                    conf_writer.write(info.to_dict('config'))
 
     pbar.close()
     if total_errors == 0:
