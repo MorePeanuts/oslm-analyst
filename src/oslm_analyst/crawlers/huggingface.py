@@ -1,3 +1,4 @@
+from huggingface_hub.errors import HfHubHTTPError
 import json
 import traceback
 from loguru import logger
@@ -249,18 +250,21 @@ class HfCrawler:
             logger.exception(f'Exception when fetch readme content from {identifier}')
             return ''
 
-    def fetch_num_of(
-        self, repo, category: Literal['users', 'models', 'datasets', 'spaces', 'followers']
-    ):
-        info = self.api.get_organization_overview(repo)
-        match category:
-            case 'users':
-                return info.num_users
-            case 'models':
-                return info.num_models
-            case 'datasets':
-                return info.num_datasets
-            case 'spaces':
-                return info.num_spaces
-            case 'followers':
-                return info.num_followers
+    def fetch_num_of(self, repo, category: Literal['models', 'datasets']):
+        try:
+            info = self.api.get_organization_overview(repo)
+            match category:
+                case 'models':
+                    return info.num_models
+                case 'datasets':
+                    return info.num_datasets
+        except HfHubHTTPError:
+            try:
+                info = self.api.get_user_overview(repo)
+                match category:
+                    case 'models':
+                        return info.num_models
+                    case 'datasets':
+                        return info.num_datasets
+            except Exception:
+                return 0
