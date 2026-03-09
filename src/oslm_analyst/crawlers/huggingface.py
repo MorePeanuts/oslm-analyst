@@ -94,7 +94,7 @@ class HfCrawler:
         self.retrier = Retrying(
             reraise=False,
             retry=retry_if_not_exception_type((ValueError, StopIteration)),
-            wait=wait_exponential(multiplier=1, min=1, max=5),
+            wait=wait_exponential(multiplier=2, min=120, max=360),
             stop=stop_after_attempt(max_retry),
         )
 

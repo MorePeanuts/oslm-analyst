@@ -163,6 +163,7 @@ class MsCrawler:
                 infos = func(repo, page_number=page_number, page_size=page_size)
                 for info in infos[key]:
                     res = Info(author=repo, **info)
+                    # BUG: If the repository requires authorization, information cannot be obtained through the `repo_info` method.
                     res.readme_content = self._fetch_readme_content(
                         f'{res.author}/{res.name}', category
                     )
