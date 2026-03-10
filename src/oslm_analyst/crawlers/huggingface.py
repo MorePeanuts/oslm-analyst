@@ -31,8 +31,13 @@ class HfInfo:
     link: str | None = field(default=None)
     readme: str | None = field(default=None)
     error: str | None = field(default=None)
-    modality: Literal['language'] | None = field(default=None)
-    lifecycle: Literal['pre-training'] | None = field(default=None)
+    modality: (
+        Literal['Language', 'Speech', 'Vision', 'Multimodal', 'Vector', 'Protein', '3D', 'Embodied']
+        | None
+    ) = field(default=None)
+    lifecycle: Literal['Pre-training', 'Fine-tuning', 'Preference', 'Evaluation'] | None = field(
+        default=None
+    )
     valid: bool | None = field(default=None)
 
     def format(self, readme: bool = False) -> str:
