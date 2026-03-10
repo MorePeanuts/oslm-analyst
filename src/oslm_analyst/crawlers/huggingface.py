@@ -236,24 +236,40 @@ class HfCrawler:
                 break
 
     def _fetch_discussions_count(self, identifier) -> tuple[int, int]:
-        discussions = self.api.get_repo_discussions(identifier)
         total_count = 0
         total_msg = 0
+        try:
+            discussions = self.retrier(self.api.get_repo_discussions, identifier)
+        except RetryError:
+            logger.exception(
+                f'Max retry exceeded when fetch discussions from {identifier}, stopping iteration'
+            )
+            return total_count, total_msg
+        except Exception:
+            logger.exception(f'Exception when fetch discussions from {identifier}')
+            return total_count, total_msg
 
         while True:
             try:
                 discussion = self.retrier(next, discussions)
                 total_count += 1
-                discussion_details = self.retrier(
-                    self.api.get_discussion_details, identifier, discussion.num
-                )
-                total_msg += len(discussion_details.events)
+                try:
+                    discussion_details = self.retrier(
+                        self.api.get_discussion_details, identifier, discussion.num
+                    )
+                    total_msg += len(discussion_details.events)
+                except Exception:
+                    logger.exception(f'Exception when fetch discussion_details from {identifier}')
+                    continue
             except StopIteration:
                 return total_count, total_msg
             except RetryError:
                 logger.exception(
                     f'Max retry exceeded when fetch discussions from {identifier}, stopping iteration'
                 )
+                return total_count, total_msg
+            except Exception:
+                logger.exception(f'Exception when fetch discussion from {identifier}')
                 return total_count, total_msg
 
     def _fetch_readme_content(self, identifier, category: Literal['model', 'dataset']) -> str:
@@ -273,16 +289,15 @@ class HfCrawler:
 
     def fetch_num_of(self, repo, category: Literal['models', 'datasets']):
         try:
-            try:
-                info = self.retrier(self.api.get_organization_overview, repo)
-                match category:
-                    case 'models':
-                        return info.num_models
-                    case 'datasets':
-                        return info.num_datasets
-            except RetryError:
-                logger.exception(f'Max retry exceeded when fetch num of {category} of {repo}')
-                raise
+            info = self.retrier(self.api.get_organization_overview, repo)
+            match category:
+                case 'models':
+                    return info.num_models
+                case 'datasets':
+                    return info.num_datasets
+        except RetryError:
+            logger.exception(f'Max retry exceeded when fetch num of {category} of {repo}')
+            raise
         except HfHubHTTPError:
             try:
                 info = self.retrier(self.api.get_user_overview, repo)
@@ -294,4 +309,5 @@ class HfCrawler:
             except RetryError:
                 logger.exception(f'Max retry exceeded when fetch num of {category} of {repo}')
             except Exception:
-                return 0
+                logger.exception(f'user/organization {repo} doesnot exists.')
+                raise

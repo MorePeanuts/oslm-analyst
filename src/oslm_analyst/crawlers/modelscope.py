@@ -245,3 +245,6 @@ class MsCrawler:
         except RetryError:
             logger.exception(f'Max retry exceeded when fetch {category} readme of {identifier}.')
             raise
+        except Exception:
+            logger.exception(f'Exception when fetch readme content of {identifier}.')
+            return ''
