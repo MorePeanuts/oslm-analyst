@@ -196,7 +196,10 @@ class MsCrawler:
                 infos = func(repo, page_number=page_number, page_size=page_size)
                 for info in infos[key]:
                     res = Info(author=repo, **info)
-                    # BUG: If the repository requires authorization, information cannot be obtained through the `repo_info` method.
+                    # WARNING: In modelscope, the id information in DatasetInfo and ModelInfo is inconsistent. Here is a temporary solution, which may become invalid at any time due to interface changes.
+                    if category == 'dataset':
+                        assert isinstance(res.id, str)
+                        res.name = res.id.split('/')[-1]
                     res.readme_content = self._fetch_readme_content(
                         f'{res.author}/{res.name}', category
                     )
