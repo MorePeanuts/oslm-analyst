@@ -1,3 +1,10 @@
+from tenacity import (
+    Retrying,
+    retry_if_not_exception_type,
+    wait_exponential,
+    stop_after_attempt,
+    RetryError,
+)
 import json
 import traceback
 from oslm_analyst.utils import today
@@ -76,6 +83,12 @@ class MsCrawler:
     def __init__(self, endpoint='https://modelscope.cn', max_retry=5):
         self.endpoint = endpoint.rstrip('/')
         self.api = HubApi(self.endpoint, max_retries=max_retry)
+        self.retrier = Retrying(
+            reraise=False,
+            retry=retry_if_not_exception_type((ValueError, StopIteration)),
+            wait=wait_exponential(multiplier=2, min=10, max=360),
+            stop=stop_after_attempt(max_retry),
+        )
         self.models_count = {}
         self.datasets_count = {}
 
@@ -178,26 +191,42 @@ class MsCrawler:
     def _fetch_from_identifier(
         self, identifier, category: Literal['model', 'dataset']
     ) -> ModelInfo | DatasetInfo:
-        info = self.api.repo_info(identifier, repo_type=category)
-        return info
+        try:
+            return self.retrier(self.api.repo_info, identifier, repo_type=category)
+        except RetryError:
+            logger.exception(
+                f'Max retry exceeded when fetch {category} information from {identifier}.'
+            )
+            raise
+        except Exception:
+            logger.exception(f'Exception when fetch {category} information from {identifier}.')
+            raise
 
     def fetch_num_of(self, repo, category: Literal['models', 'datasets']) -> int | None:
-        if category == 'models':
-            num = self.models_count.get(repo)
-            if num is None:
-                infos = self.api.list_models(repo)
-                num = infos['TotalCount']
-            return num
-        else:
-            num = self.datasets_count.get(repo)
-            if num is None:
-                infos = self.api.list_datasets(repo)
-                num = infos['total_count']
-            return num
+        try:
+            if category == 'models':
+                num = self.models_count.get(repo)
+                if num is None:
+                    infos = self.retrier(self.api.list_models, repo)
+                    num = infos['TotalCount']
+                return num
+            else:
+                num = self.datasets_count.get(repo)
+                if num is None:
+                    infos = self.retrier(self.api.list_datasets, repo)
+                    num = infos['total_count']
+                return num
+        except RetryError:
+            logger.exception(f'Exception when fetch num of {category} of {repo}')
+            raise
 
     def _fetch_readme_content(self, identifier, category: Literal['model', 'dataset']) -> str:
-        info = self.api.repo_info(identifier, repo_type=category)
-        if isinstance(info.readme_content, str):
-            return info.readme_content
-        else:
-            return ''
+        try:
+            info = self.retrier(self.api.repo_info, identifier, repo_type=category)
+            if isinstance(info.readme_content, str):
+                return info.readme_content
+            else:
+                return ''
+        except RetryError:
+            logger.exception(f'Max retry exceeded when fetch {category} readme of {identifier}.')
+            raise

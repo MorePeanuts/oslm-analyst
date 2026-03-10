@@ -95,7 +95,7 @@ class HfCrawler:
         self.retrier = Retrying(
             reraise=False,
             retry=retry_if_not_exception_type((ValueError, StopIteration)),
-            wait=wait_exponential(multiplier=2, min=120, max=360),
+            wait=wait_exponential(multiplier=2, min=60, max=360),
             stop=stop_after_attempt(max_retry),
         )
 
@@ -252,19 +252,25 @@ class HfCrawler:
 
     def fetch_num_of(self, repo, category: Literal['models', 'datasets']):
         try:
-            info = self.api.get_organization_overview(repo)
-            match category:
-                case 'models':
-                    return info.num_models
-                case 'datasets':
-                    return info.num_datasets
-        except HfHubHTTPError:
             try:
-                info = self.api.get_user_overview(repo)
+                info = self.retrier(self.api.get_organization_overview, repo)
                 match category:
                     case 'models':
                         return info.num_models
                     case 'datasets':
                         return info.num_datasets
+            except RetryError:
+                logger.exception(f'Max retry exceeded when fetch num of {category} of {repo}')
+                raise
+        except HfHubHTTPError:
+            try:
+                info = self.retrier(self.api.get_user_overview, repo)
+                match category:
+                    case 'models':
+                        return info.num_models
+                    case 'datasets':
+                        return info.num_datasets
+            except RetryError:
+                logger.exception(f'Max retry exceeded when fetch num of {category} of {repo}')
             except Exception:
                 return 0
