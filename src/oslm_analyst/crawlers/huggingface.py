@@ -1,3 +1,4 @@
+import re
 from huggingface_hub.errors import HfHubHTTPError
 import json
 import traceback
@@ -10,9 +11,8 @@ from huggingface_hub.hf_api import ModelInfo, DatasetInfo
 from tenacity import (
     Retrying,
     RetryError,
-    wait_exponential,
     stop_after_attempt,
-    retry_if_not_exception_type,
+    retry_if_exception,
 )
 from .crawl_utils import str2int
 from ..utils import today
@@ -85,6 +85,27 @@ class HfInfo:
         return obj
 
 
+def _is_rate_limit_error(exception):
+    return isinstance(exception, HfHubHTTPError) and exception.response.status_code == 429
+
+
+def hf_wait_logic(retry_state):
+    exc = retry_state.outcome.exception()
+
+    if isinstance(exc, HfHubHTTPError):
+        retry_after = exc.response.headers.get('Retry-After')
+        if retry_after:
+            return float(retry_after)
+
+        # "Retry after 55 seconds (0/500 requests remaining...)"
+        server_msg = str(exc)
+        match = re.search(r'Retry after (\d+) seconds', server_msg)
+        if match:
+            return float(match.group(1))
+
+    return 60.0
+
+
 class HfCrawler:
     def __init__(
         self, token: str | bool | None = None, endpoint='https://huggingface.co', max_retry=5
@@ -94,8 +115,8 @@ class HfCrawler:
         # reraise=False: raise RetryError when max retry exceeded
         self.retrier = Retrying(
             reraise=False,
-            retry=retry_if_not_exception_type((ValueError, StopIteration)),
-            wait=wait_exponential(multiplier=2, min=60, max=360),
+            retry=retry_if_exception(_is_rate_limit_error),
+            wait=hf_wait_logic,
             stop=stop_after_attempt(max_retry),
         )
 

@@ -1,9 +1,9 @@
+from requests.exceptions import HTTPError
 from tenacity import (
     Retrying,
-    retry_if_not_exception_type,
-    wait_exponential,
     stop_after_attempt,
     RetryError,
+    retry_if_exception,
 )
 import json
 import traceback
@@ -79,14 +79,29 @@ class MsInfo:
         return obj
 
 
+def _is_rate_limit_error(exception):
+    return isinstance(exception, HTTPError) and exception.response.status_code == 429
+
+
+def ms_wait_logit(retry_state):
+    exc = retry_state.outcome.exception()
+
+    if isinstance(exc, HTTPError):
+        retry_after = exc.response.headers.get('Retry-After')
+        if retry_after:
+            return float(retry_after)
+
+    return 60.0
+
+
 class MsCrawler:
     def __init__(self, endpoint='https://modelscope.cn', max_retry=5):
         self.endpoint = endpoint.rstrip('/')
         self.api = HubApi(self.endpoint, max_retries=max_retry)
         self.retrier = Retrying(
             reraise=False,
-            retry=retry_if_not_exception_type((ValueError, StopIteration)),
-            wait=wait_exponential(multiplier=2, min=10, max=360),
+            retry=retry_if_exception(_is_rate_limit_error),
+            wait=ms_wait_logit,
             stop=stop_after_attempt(max_retry),
         )
         self.models_count = {}
