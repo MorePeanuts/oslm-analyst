@@ -1,11 +1,11 @@
-from oslm_analyst.crawlers.modelscope import MsCrawler
+from oslm_analyst.crawlers.modelscope import MsCrawler, MsInfo
 import jsonlines
 from pathlib import Path
 from typing import NamedTuple, Literal
 from dataclasses import asdict
 from loguru import logger
 from tqdm import tqdm
-from .crawlers.huggingface import HfCrawler
+from .crawlers.huggingface import HfCrawler, HfInfo
 from .utils import Source
 
 
@@ -31,6 +31,11 @@ def run_hf_crawl_pipeline(
     err_path = out_path / f'err_{inp_src[0].category}_data.jsonl'
     # TODO: temp solution for persistent information
     conf_path = Path(__file__).parents[2] / 'config/hf_config.jsonl'
+    conf = {}
+    if conf_path.exists():
+        with jsonlines.open(conf_path, 'r') as conf_reader:
+            for line in conf_reader:
+                conf[f'{line["repo"]}/{line["name"]}'] = line
     logger.info(f'Huggingface pipeline output path: {outp_path}')
     logger.info(f'Huggingface pipeline error path: {err_path}')
 
@@ -59,8 +64,14 @@ def run_hf_crawl_pipeline(
                     pbar.write(f'Error when fetch {info}')
                     err_writer.write(info.to_dict('error'))
                 else:
+                    identifier = f'{info.repo}/{info.name}'
+                    if identifier in conf:
+                        conf[identifier]['readme'] = info.readme
+                    else:
+                        conf[identifier] = info.to_dict('config')
+                    info.update_from_config(conf[identifier])
                     out_writer.write(info.to_dict('output'))
-                    conf_writer.write(info.to_dict('config'))
+        conf_writer.write_all(list(conf.values()))
 
     pbar.close()
     if total_errors == 0:
@@ -81,10 +92,15 @@ def run_ms_crawl_pipeline(
         kwargs['endpoint'] = endpoint
     crawler = MsCrawler(**kwargs)
 
-    outp_path = out_path / f'raw_{inp_src[0].category}_data.json'
-    err_path = out_path / f'err_{inp_src[0].category}_data.json'
+    outp_path = out_path / f'raw_{inp_src[0].category}_data.jsonl'
+    err_path = out_path / f'err_{inp_src[0].category}_data.jsonl'
     # TODO: temp solution for persistent information
     conf_path = Path(__file__).parents[2] / 'config/ms_config.jsonl'
+    conf = {}
+    if conf_path.exists():
+        with jsonlines.open(conf_path, 'r') as conf_reader:
+            for line in conf_reader:
+                conf[f'{line["repo"]}/{line["name"]}'] = line
     logger.info(f'Modelscope pipeline output path: {outp_path}')
     logger.info(f'Modelscope pipeline error path: {err_path}')
 
@@ -113,8 +129,14 @@ def run_ms_crawl_pipeline(
                     pbar.write(f'Error when fetch {info}')
                     err_writer.write(info.to_dict('error'))
                 else:
+                    identifier = f'{info.repo}/{info.name}'
+                    if identifier in conf:
+                        conf[identifier]['readme'] = info.readme
+                    else:
+                        conf[identifier] = info.to_dict('config')
+                    info.update_from_config(conf[identifier])
                     out_writer.write(info.to_dict('output'))
-                    conf_writer.write(info.to_dict('config'))
+        conf_writer.write_all(list(conf.values()))
 
     pbar.close()
     if total_errors == 0:

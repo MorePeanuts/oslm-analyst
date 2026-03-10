@@ -89,6 +89,11 @@ class HfInfo:
                 obj.pop('error')
         return obj
 
+    def update_from_config(self, conf: dict):
+        self.readme = conf.get('readme', '')
+        self.modality = conf.get('modality', None)
+        self.lifecycle = conf.get('lifecycle', None)
+
 
 def _is_rate_limit_error(exception):
     return isinstance(exception, HfHubHTTPError) and exception.response.status_code == 429
@@ -289,7 +294,7 @@ class HfCrawler:
             logger.exception(f'Max retry exceeded when fetch readme content from {identifier}')
             return ''
         except Exception:
-            logger.exception(f'Exception when fetch readme content from {identifier}')
+            logger.debug(f'No readme file found in {identifier}.')
             return ''
 
     def fetch_num_of(self, repo, category: Literal['models', 'datasets']):

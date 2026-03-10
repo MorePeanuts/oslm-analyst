@@ -83,6 +83,11 @@ class MsInfo:
                 obj.pop('error')
         return obj
 
+    def update_from_config(self, conf: dict):
+        self.readme = conf.get('readme', '')
+        self.modality = conf.get('modality', None)
+        self.lifecycle = conf.get('lifecycle', None)
+
 
 def _is_rate_limit_error(exception):
     return isinstance(exception, HTTPError) and exception.response.status_code == 429
@@ -169,7 +174,8 @@ class MsCrawler:
     def _fetch_from_repo(
         self, repo, category: Literal['model', 'dataset']
     ) -> Iterator[tuple[ModelInfo | DatasetInfo | None, str | None]]:
-        page_size = 20
+        # WARNING: Changing it to other numbers may cause a bug, which could be an issue with the modelscope library itself.
+        page_size = 10
         page_number = 1
         match category:
             case 'model':
@@ -194,6 +200,7 @@ class MsCrawler:
         for page_number in range(1, total_page + 1):
             try:
                 infos = func(repo, page_number=page_number, page_size=page_size)
+                print(len(infos[key]))
                 for info in infos[key]:
                     res = Info(author=repo, **info)
                     # WARNING: In modelscope, the id information in DatasetInfo and ModelInfo is inconsistent. Here is a temporary solution, which may become invalid at any time due to interface changes.
@@ -254,4 +261,5 @@ class MsCrawler:
             logger.exception(f'Max retry exceeded when fetch {category} readme of {identifier}.')
             raise
         except Exception:
+            logger.debug(f'No readme field found in {identifier}.')
             return ''
