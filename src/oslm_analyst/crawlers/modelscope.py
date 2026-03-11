@@ -200,7 +200,6 @@ class MsCrawler:
         for page_number in range(1, total_page + 1):
             try:
                 infos = func(repo, page_number=page_number, page_size=page_size)
-                print(len(infos[key]))
                 for info in infos[key]:
                     res = Info(author=repo, **info)
                     # WARNING: In modelscope, the id information in DatasetInfo and ModelInfo is inconsistent. Here is a temporary solution, which may become invalid at any time due to interface changes.

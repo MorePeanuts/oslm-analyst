@@ -149,7 +149,7 @@ class HfCrawler:
             identifier = repo + '/' + name
             try:
                 info = self._fetch_from_identifier(identifier, category)
-                disc, msg = self._fetch_discussions_count(identifier)
+                disc, msg = self._fetch_discussions_count(identifier, category)
                 readme = self._fetch_readme_content(identifier, category)
                 link = base_link + '/' + identifier
                 yield HfInfo(
@@ -177,7 +177,7 @@ class HfCrawler:
                 else:
                     identifier = info.id
                     try:
-                        disc, msg = self._fetch_discussions_count(identifier)
+                        disc, msg = self._fetch_discussions_count(identifier, category)
                         readme = self._fetch_readme_content(identifier, category)
                         link = base_link + '/' + identifier
                         yield HfInfo(
@@ -245,11 +245,15 @@ class HfCrawler:
                 yield None, error
                 break
 
-    def _fetch_discussions_count(self, identifier) -> tuple[int, int]:
+    def _fetch_discussions_count(
+        self, identifier, category: Literal['model', 'dataset']
+    ) -> tuple[int, int]:
         total_count = 0
         total_msg = 0
         try:
-            discussions = self.retrier(self.api.get_repo_discussions, identifier)
+            discussions = self.retrier(
+                self.api.get_repo_discussions, identifier, repo_type=category
+            )
         except RetryError:
             logger.exception(
                 f'Max retry exceeded when fetch discussions from {identifier}, stopping iteration'
@@ -265,7 +269,10 @@ class HfCrawler:
                 total_count += 1
                 try:
                     discussion_details = self.retrier(
-                        self.api.get_discussion_details, identifier, discussion.num
+                        self.api.get_discussion_details,
+                        identifier,
+                        discussion.num,
+                        repo_type=category,
                     )
                     total_msg += len(discussion_details.events)
                 except Exception:
