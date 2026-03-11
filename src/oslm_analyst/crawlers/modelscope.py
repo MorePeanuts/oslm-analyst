@@ -1,3 +1,4 @@
+from functools import partial
 from requests.exceptions import HTTPError
 from tenacity import (
     Retrying,
@@ -179,14 +180,14 @@ class MsCrawler:
         page_number = 1
         match category:
             case 'model':
-                func = self.api.list_models
+                func = partial(self.retrier, self.api.list_models)
                 infos = func(repo, page_number, page_size)
                 key = 'Models'
                 self.models_count[repo] = infos['TotalCount']
                 total_count = infos['TotalCount']
                 Info = ModelInfo
             case 'dataset':
-                func = self.api.list_datasets
+                func = partial(self.retrier, self.api.list_datasets)
                 infos = func(repo, page_number=page_number, page_size=page_size)
                 key = 'datasets'
                 self.datasets_count[repo] = infos['total_count']
@@ -201,6 +202,7 @@ class MsCrawler:
             try:
                 infos = func(repo, page_number=page_number, page_size=page_size)
                 for info in infos[key]:
+                    # BUG: The infos[key] here may not have retrieved the correct list due to network issues, leading to a TypeError (NoneType) BUG.
                     res = Info(author=repo, **info)
                     # WARNING: In modelscope, the id information in DatasetInfo and ModelInfo is inconsistent. Here is a temporary solution, which may become invalid at any time due to interface changes.
                     if category == 'dataset':
@@ -211,6 +213,7 @@ class MsCrawler:
                     )
                     yield res, None
             except Exception:
+                # TODO: The error retry mechanism needs improvement; currently, if an exception occurs, the code cannot identify on which page the exception was encountered.
                 logger.exception(
                     f'Exception when crawl {repo} ({category}) at page {page_number} (page_size={page_size})'
                 )
