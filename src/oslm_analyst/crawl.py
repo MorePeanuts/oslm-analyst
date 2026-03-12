@@ -1,3 +1,5 @@
+from oslm_analyst.processors.modality import ModelExtraInfo, DatasetExtraInfo
+from oslm_analyst.crawlers.crawl_utils import format_identifier_from_dict, format_identifier
 from oslm_analyst.crawlers.baai_data import BAAIDataCrawler
 from oslm_analyst.crawlers.modelscope import MsCrawler, MsInfo
 import jsonlines
@@ -30,15 +32,23 @@ def run_hf_crawl_pipeline(
 
     outp_path = out_path / f'raw_{inp_src[0].category}_data.jsonl'
     err_path = out_path / f'err_{inp_src[0].category}_data.jsonl'
-    # TODO: temp solution for persistent information
-    conf_path = Path(__file__).parents[2] / 'config/hf_config.jsonl'
-    conf = {}
-    if conf_path.exists():
-        with jsonlines.open(conf_path, 'r') as conf_reader:
-            for line in conf_reader:
-                conf[f'{line["repo"]}/{line["name"]}'] = line
     logger.info(f'Huggingface pipeline output path: {outp_path}')
     logger.info(f'Huggingface pipeline error path: {err_path}')
+
+    model_info_path = Path(__file__).parents[2] / 'config/model_info.jsonl'
+    dataset_info_path = Path(__file__).parents[2] / 'config/dataset_info.jsonl'
+    logger.info(f'Loading model extra information from {model_info_path}')
+    logger.info(f'Loading dataset extra information from {dataset_info_path}')
+    model_info: dict[str, ModelExtraInfo] = {}
+    dataset_info: dict[str, DatasetExtraInfo] = {}
+    if model_info_path.exists():
+        with jsonlines.open(model_info_path, 'r') as reader:
+            for line in reader:
+                model_info[format_identifier_from_dict(line)] = ModelExtraInfo.from_dict(line)
+    if dataset_info_path.exists():
+        with jsonlines.open(dataset_info_path, 'r') as reader:
+            for line in reader:
+                dataset_info[format_identifier_from_dict(line)] = DatasetExtraInfo.from_dict(line)
 
     total_errors = 0
     logger.info('Calculate total records...')
@@ -53,7 +63,6 @@ def run_hf_crawl_pipeline(
     with (
         jsonlines.open(outp_path, 'a', flush=True) as out_writer,
         jsonlines.open(err_path, 'w', flush=True) as err_writer,
-        jsonlines.open(conf_path, 'w', flush=True) as conf_writer,
     ):
         for src in inp_src:
             pbar.set_description(f'crawling {src.category} from {src.repo}')
@@ -65,14 +74,27 @@ def run_hf_crawl_pipeline(
                     pbar.write(f'Error when fetch {info}')
                     err_writer.write(info.to_dict('error'))
                 else:
-                    identifier = f'{info.repo}/{info.name}'
-                    if identifier in conf:
-                        conf[identifier]['readme'] = info.readme
-                    else:
-                        conf[identifier] = info.to_dict('config')
-                    info.update_from_config(conf[identifier])
+                    identifier = format_identifier(info.repo, info.name)
+                    if src.category == 'model':
+                        if identifier not in model_info:
+                            model_info[identifier] = ModelExtraInfo.from_dataclass(info)
+                        else:
+                            info.update_from_extra_info(model_info[identifier].to_dict())
+                    elif src.category == 'dataset':
+                        if identifier not in dataset_info:
+                            dataset_info[identifier] = DatasetExtraInfo.from_dataclass(info)
+                        else:
+                            info.update_from_extra_info(dataset_info[identifier].to_dict())
                     out_writer.write(info.to_dict('output'))
-        conf_writer.write_all(list(conf.values()))
+
+    with (
+        jsonlines.open(model_info_path, 'w', flush=True) as model_writer,
+        jsonlines.open(dataset_info_path, 'w', flush=True) as dataset_writer,
+    ):
+        for _, v in model_info.items():
+            model_writer.write(v.to_dict())
+        for _, v in dataset_info.items():
+            dataset_writer.write(v.to_dict())
 
     pbar.close()
     if total_errors == 0:
@@ -95,15 +117,23 @@ def run_ms_crawl_pipeline(
 
     outp_path = out_path / f'raw_{inp_src[0].category}_data.jsonl'
     err_path = out_path / f'err_{inp_src[0].category}_data.jsonl'
-    # TODO: temp solution for persistent information
-    conf_path = Path(__file__).parents[2] / 'config/ms_config.jsonl'
-    conf = {}
-    if conf_path.exists():
-        with jsonlines.open(conf_path, 'r') as conf_reader:
-            for line in conf_reader:
-                conf[f'{line["repo"]}/{line["name"]}'] = line
     logger.info(f'Modelscope pipeline output path: {outp_path}')
     logger.info(f'Modelscope pipeline error path: {err_path}')
+
+    model_info_path = Path(__file__).parents[2] / 'config/model_info.jsonl'
+    dataset_info_path = Path(__file__).parents[2] / 'config/dataset_info.jsonl'
+    logger.info(f'Loading model extra information from {model_info_path}')
+    logger.info(f'Loading dataset extra information from {dataset_info_path}')
+    model_info: dict[str, ModelExtraInfo] = {}
+    dataset_info: dict[str, DatasetExtraInfo] = {}
+    if model_info_path.exists():
+        with jsonlines.open(model_info_path, 'r') as reader:
+            for line in reader:
+                model_info[format_identifier_from_dict(line)] = ModelExtraInfo.from_dict(line)
+    if dataset_info_path.exists():
+        with jsonlines.open(dataset_info_path, 'r') as reader:
+            for line in reader:
+                dataset_info[format_identifier_from_dict(line)] = DatasetExtraInfo.from_dict(line)
 
     total_errors = 0
     logger.info('Calculate total records...')
@@ -118,7 +148,6 @@ def run_ms_crawl_pipeline(
     with (
         jsonlines.open(outp_path, 'a', flush=True) as out_writer,
         jsonlines.open(err_path, 'w', flush=True) as err_writer,
-        jsonlines.open(conf_path, 'w', flush=True) as conf_writer,
     ):
         for src in inp_src:
             pbar.set_description(f'crawling {src.category} data from {src.repo}')
@@ -130,14 +159,27 @@ def run_ms_crawl_pipeline(
                     pbar.write(f'Error when fetch {info}')
                     err_writer.write(info.to_dict('error'))
                 else:
-                    identifier = f'{info.repo}/{info.name}'
-                    if identifier in conf:
-                        conf[identifier]['readme'] = info.readme
-                    else:
-                        conf[identifier] = info.to_dict('config')
-                    info.update_from_config(conf[identifier])
+                    identifier = format_identifier(info.repo, info.name)
+                    if src.category == 'model':
+                        if identifier not in model_info:
+                            model_info[identifier] = ModelExtraInfo.from_dataclass(info)
+                        else:
+                            info.update_from_extra_info(model_info[identifier].to_dict())
+                    elif src.category == 'dataset':
+                        if identifier not in dataset_info:
+                            dataset_info[identifier] = DatasetExtraInfo.from_dataclass(info)
+                        else:
+                            info.update_from_extra_info(dataset_info[identifier].to_dict())
                     out_writer.write(info.to_dict('output'))
-        conf_writer.write_all(list(conf.values()))
+
+    with (
+        jsonlines.open(model_info_path, 'w', flush=True) as model_writer,
+        jsonlines.open(dataset_info_path, 'w', flush=True) as dataset_writer,
+    ):
+        for _, v in model_info.items():
+            model_writer.write(v.to_dict())
+        for _, v in dataset_info.items():
+            dataset_writer.write(v.to_dict())
 
     pbar.close()
     if total_errors == 0:
@@ -147,25 +189,29 @@ def run_ms_crawl_pipeline(
 def run_baai_data_pipeline(out_path: Path):
     crawler = BAAIDataCrawler()
     outp_path = out_path / 'raw_dataset_data.jsonl'
-    # TODO: temp solution
-    conf_path = Path(__file__).parents[2] / 'config/baai_config.jsonl'
-    conf = {}
-    if conf_path.exists():
-        with jsonlines.open(conf_path, 'r') as conf_reader:
-            for line in conf_reader:
-                conf[f'{line["repo"]}/{line["name"]}'] = line
     logger.info(f'BAAIData pipeline output path: {outp_path}')
+
+    dataset_info_path = Path(__file__).parents[2] / 'config/dataset_info.jsonl'
+    logger.info(f'Loading dataset extra information from {dataset_info_path}')
+    dataset_info: dict[str, DatasetExtraInfo] = {}
+    if dataset_info_path.exists():
+        with jsonlines.open(dataset_info_path, 'r') as reader:
+            for line in reader:
+                dataset_info[format_identifier_from_dict(line)] = DatasetExtraInfo.from_dict(line)
 
     with (
         jsonlines.open(outp_path, 'a', flush=True) as out_writer,
-        jsonlines.open(conf_path, 'w', flush=True) as conf_writer,
     ):
         results = crawler.scrape()
         assert isinstance(results, list)
         for info in results:
-            identifier = f'{info.repo}/{info.name}'
-            if identifier not in conf:
-                conf[identifier] = info.to_dict('config')
-            info.update_from_config(conf[identifier])
-            out_writer.write(info.to_dict('output'))
-        conf_writer.write_all(list(conf.values()))
+            identifier = format_identifier(info.repo, info.name)
+            if identifier not in dataset_info:
+                dataset_info[identifier] = DatasetExtraInfo.from_dataclass(info)
+            else:
+                info.update_from_extra_info(dataset_info[identifier].to_dict())
+            out_writer.write(info.to_dict())
+
+    with jsonlines.open(dataset_info_path, 'w', flush=True) as writer:
+        for _, v in dataset_info.items():
+            writer.write(v.to_dict())

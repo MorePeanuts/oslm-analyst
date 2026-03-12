@@ -1,4 +1,4 @@
-from oslm_analyst.processors.modality import Modality, Lifecycle
+from oslm_analyst.processors.modality import Modality, Lifecycle, ModelExtraInfo, DatasetExtraInfo
 import re
 from huggingface_hub.errors import HfHubHTTPError
 import json
@@ -73,7 +73,7 @@ class HfInfo:
                 obj.pop('error')
         return obj
 
-    def update_from_config(self, conf: dict):
+    def update_from_extra_info(self, conf: dict):
         self.modality = conf.get('modality', None)
         self.lifecycle = conf.get('lifecycle', None)
         self.valid = conf.get('valid', None)

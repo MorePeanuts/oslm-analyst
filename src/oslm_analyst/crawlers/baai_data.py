@@ -27,7 +27,7 @@ class BAAIDataInfo:
     def to_dict(self):
         return asdict(self)
 
-    def update_from_config(self, conf: dict):
+    def update_from_extra_info(self, conf: dict):
         self.modality = conf.get('modality', None)
         self.lifecycle = conf.get('lifecycle', None)
         self.valid = conf.get('valid', None)
