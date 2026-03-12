@@ -1,5 +1,6 @@
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
+from typing import Literal
 from loguru import logger
 from datetime import datetime
 from selenium.webdriver.common.by import By
@@ -7,25 +8,34 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
-from .crawl_utils import str2int
+from .crawl_utils import str2int, init_single_driver
+from ..utils import today
 
 
 @dataclass
 class OpenDataLabInfo:
     org: str = field(init=False, default='ShanghaiAILab')
     repo: str = field(init=False)
-    dataset_name: str = field(init=False)
-    total_downloads: int | None = field(init=False, default=None)
+    name: str = field(init=False)
+    downloads: int | None = field(init=False, default=None)
     likes: int | None = field(init=False, default=None)
     date_crawl: str = field()
     link: str = field()
+    modality: (
+        Literal['Language', 'Speech', 'Vision', 'Multimodal', 'Vector', 'Protein', '3D', 'Embodied']
+        | None
+    ) = field(default=None)
+    lifecycle: Literal['Pre-training', 'Fine-tuning', 'Preference', 'Evaluation'] | None = field(
+        default=None
+    )
+    valid: bool | None = field(default=None)
     metadata: dict | None = field(default=None)
 
     def __post_init__(self):
-        self.dataset_name = self.link.rstrip('/').split('/')[-1]
+        self.name = self.link.rstrip('/').split('/')[-1]
         self.repo = self.link.rstrip('/').split('/')[-2]
         if self.metadata is not None:
-            self.total_downloads = str2int(self.metadata.get('downloads', 0))
+            self.downloads = str2int(self.metadata.get('downloads', 0))
             self.likes = str2int(self.metadata.get('likes', 0))
 
     def __eq__(self, other) -> bool:
@@ -36,6 +46,20 @@ class OpenDataLabInfo:
 
     def __hash__(self) -> int:
         return hash(self.link)
+
+    def to_dict(self, type: Literal['output', 'config']):
+        obj = asdict(self)
+        obj.pop('metadata')
+        if type == 'config':
+            obj.pop('downloads')
+            obj.pop('likes')
+            obj.pop('date_crawl')
+        return obj
+
+    def update_from_config(self, conf: dict):
+        self.modality = conf.get('modality', None)
+        self.lifecycle = conf.get('lifecycle', None)
+        self.valid = conf.get('valid', None)
 
 
 class OpenDataLabCrawler:
@@ -59,12 +83,19 @@ class OpenDataLabCrawler:
         '//*[@id="root"]/div/div/main/div/div[2]/div[3]/div/div/div[2]/div[2]/ul',
     )
     max_count_per_page = 12
+    links = [
+        'https://opendatalab.com/?createdBy=12199&pageNo=0&pageSize=12&sort=downloadCount',
+        'https://opendatalab.com/?createdBy=11828&pageNo=0&pageSize=12&sort=downloadCount',
+        'https://opendatalab.com/?createdBy=12157&pageNo=0&pageSize=12&sort=downloadCount',
+        'https://opendatalab.com/?createdBy=12589&pageNo=0&pageSize=12&sort=downloadCount',
+        'https://opendatalab.com/?createdBy=1678533&pageNo=0&pageSize=12&sort=downloadCount',
+    ]
 
-    def __init__(self, driver: WebDriver):
-        self.driver = driver
+    def __init__(self):
+        self.driver = init_single_driver()
 
     def scrape(self, link: str) -> list[OpenDataLabInfo]:
-        date_crawl = str(datetime.today().date())
+        date_crawl = today()
         self.driver.get(link)
         res = []
 

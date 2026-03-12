@@ -88,6 +88,7 @@ class MsInfo:
         self.readme = conf.get('readme', '')
         self.modality = conf.get('modality', None)
         self.lifecycle = conf.get('lifecycle', None)
+        self.valid = conf.get('valid', None)
 
 
 def _is_rate_limit_error(exception):

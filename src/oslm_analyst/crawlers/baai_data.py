@@ -1,18 +1,40 @@
 import requests
+from typing import Literal
 from loguru import logger
 from datetime import datetime
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
+from ..utils import today
 
 
 @dataclass
 class BAAIDataInfo:
-    org: str = field(init=False, default='BAAI')
     repo: str = field(init=False, default='BAAI')
-    dataset_name: str = field()
-    total_downloads: int | None = field()
+    name: str = field()
+    downloads: int | None = field()
     likes: int | None = field()
     date_crawl: str = field()
     link: str = field()
+    modality: (
+        Literal['Language', 'Speech', 'Vision', 'Multimodal', 'Vector', 'Protein', '3D', 'Embodied']
+        | None
+    ) = field(default=None)
+    lifecycle: Literal['Pre-training', 'Fine-tuning', 'Preference', 'Evaluation'] | None = field(
+        default=None
+    )
+    valid: bool | None = field(default=None)
+
+    def to_dict(self, type: Literal['config', 'output']):
+        obj = asdict(self)
+        if type == 'config':
+            obj.pop('downloads')
+            obj.pop('likes')
+            obj.pop('date_crawl')
+        return obj
+
+    def update_from_config(self, conf: dict):
+        self.modality = conf.get('modality', None)
+        self.lifecycle = conf.get('lifecycle', None)
+        self.valid = conf.get('valid', None)
 
 
 class BAAIDataCrawler:
@@ -21,7 +43,7 @@ class BAAIDataCrawler:
         self._init_cookies()
 
     def scrape(self) -> list[BAAIDataInfo] | str:
-        date_crawl = str(datetime.today().date())
+        date_crawl = today()
         data = {
             'limit': 1000,
             'offset': 0,
@@ -36,8 +58,8 @@ class BAAIDataCrawler:
             for link, info in infos.items():
                 res.append(
                     BAAIDataInfo(
-                        dataset_name=info['uriName'],
-                        total_downloads=info['downloadNumb'],
+                        name=info['uriName'],
+                        downloads=info['downloadNumb'],
                         likes=info['subscribedNumb'],
                         date_crawl=date_crawl,
                         link=link,

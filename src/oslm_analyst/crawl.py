@@ -1,3 +1,5 @@
+from oslm_analyst.crawlers.open_data_lab import OpenDataLabCrawler
+from oslm_analyst.crawlers.baai_data import BAAIDataCrawler
 from oslm_analyst.crawlers.modelscope import MsCrawler, MsInfo
 import jsonlines
 from pathlib import Path
@@ -141,3 +143,57 @@ def run_ms_crawl_pipeline(
     pbar.close()
     if total_errors == 0:
         err_path.unlink()
+
+
+def run_baai_data_pipeline(out_path: Path):
+    crawler = BAAIDataCrawler()
+    outp_path = out_path / 'raw_dataset_data.jsonl'
+    # TODO: temp solution
+    conf_path = Path(__file__).parents[2] / 'config/baai_config.jsonl'
+    conf = {}
+    if conf_path.exists():
+        with jsonlines.open(conf_path, 'r') as conf_reader:
+            for line in conf_reader:
+                conf[f'{line["repo"]}/{line["name"]}'] = line
+    logger.info(f'BAAIData pipeline output path: {outp_path}')
+
+    with (
+        jsonlines.open(outp_path, 'a', flush=True) as out_writer,
+        jsonlines.open(conf_path, 'w', flush=True) as conf_writer,
+    ):
+        results = crawler.scrape()
+        assert isinstance(results, list)
+        for info in results:
+            identifier = f'{info.repo}/{info.name}'
+            if identifier not in conf:
+                conf[identifier] = info.to_dict('config')
+            info.update_from_config(conf[identifier])
+            out_writer.write(info.to_dict('output'))
+        conf_writer.write_all(list(conf.values()))
+
+
+def run_opendatalab_pipeline(out_path: Path):
+    crawler = OpenDataLabCrawler()
+    outp_path = out_path / 'raw_dataset_data.jsonl'
+    # TODO: temp solution
+    conf_path = Path(__file__).parents[2] / 'config/opendatalab_config.jsonl'
+    conf = {}
+    if conf_path.exists():
+        with jsonlines.open(conf_path, 'r') as conf_reader:
+            for line in conf_reader:
+                conf[f'{line["repo"]}/{line["name"]}'] = line
+    logger.info(f'OpenDataLab pipeline output path: {outp_path}')
+
+    with (
+        jsonlines.open(outp_path, 'a', flush=True) as out_writer,
+        jsonlines.open(conf_path, 'w', flush=True) as conf_writer,
+    ):
+        for link in crawler.links:
+            results = crawler.scrape(link)
+            for info in results:
+                identifier = f'{info.repo}/{info.name}'
+                if identifier not in conf:
+                    conf[identifier] = info.to_dict('config')
+                info.update_from_config(conf[identifier])
+                out_writer.write(info.to_dict('output'))
+        conf_writer.write_all(list(conf.values()))
