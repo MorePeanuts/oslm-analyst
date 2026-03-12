@@ -182,10 +182,10 @@ def crawl(
                 max_retry=max_retry,
                 endpoint=endpoint,
             )
-        case 'open-datalab':
-            run_opendatalab_pipeline(out_path=outp)
         case 'baai-datahub':
             run_baai_data_pipeline(out_path=outp)
+        case _:
+            raise NotImplementedError()
 
 
 @app.command()
