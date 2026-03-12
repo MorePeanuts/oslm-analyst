@@ -14,6 +14,7 @@ class BAAIDataInfo:
     likes: int | None = field()
     date_crawl: str = field()
     link: str = field()
+    category: str = field(default='dataset')
     modality: (
         Literal['Language', 'Speech', 'Vision', 'Multimodal', 'Vector', 'Protein', '3D', 'Embodied']
         | None

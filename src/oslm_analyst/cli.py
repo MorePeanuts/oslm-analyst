@@ -10,11 +10,12 @@ from .crawl import (
     run_hf_crawl_pipeline,
     run_ms_crawl_pipeline,
     run_baai_data_pipeline,
-    run_opendatalab_pipeline,
 )
 
 
 app = typer.Typer(name='OSLM-Analyst', help='Open-source large models data analyst.')
+process_app = typer.Typer(name='Raw-data Processor', help='Post-process the raw data.')
+app.add_typer(process_app, name='process')
 
 
 @app.command()
@@ -188,12 +189,16 @@ def crawl(
             raise NotImplementedError()
 
 
-@app.command()
-def process():
-    """
-    Process the raw data obtained from the crawler.
-    """
-    raise NotImplementedError()
+@process_app.command('gen-modality')
+def process_modality():
+    """ """
+    pass
+
+
+@process_app.command('osir-lmts')
+def process_osir_lmts():
+    """ """
+    pass
 
 
 @app.command()

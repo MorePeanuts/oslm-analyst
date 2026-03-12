@@ -1,4 +1,3 @@
-from oslm_analyst.crawlers.open_data_lab import OpenDataLabCrawler
 from oslm_analyst.crawlers.baai_data import BAAIDataCrawler
 from oslm_analyst.crawlers.modelscope import MsCrawler, MsInfo
 import jsonlines
