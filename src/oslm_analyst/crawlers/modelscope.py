@@ -1,3 +1,4 @@
+from oslm_analyst.processors.modality import Modality, Lifecycle
 from functools import partial
 from requests.exceptions import HTTPError
 from tenacity import (
@@ -26,18 +27,12 @@ class MsInfo:
     downloads: int | None = field(default=None)
     likes: int | None = field(default=None)
     link: str | None = field(default=None)
-    readme: str | None = field(default=None)
     error: str | None = field(default=None)
-    modality: (
-        Literal['Language', 'Speech', 'Vision', 'Multimodal', 'Vector', 'Protein', '3D', 'Embodied']
-        | None
-    ) = field(default=None)
-    lifecycle: Literal['Pre-training', 'Fine-tuning', 'Preference', 'Evaluation'] | None = field(
-        default=None
-    )
+    modality: Modality | None = field(default=None)
+    lifecycle: Lifecycle | None = field(default=None)
     valid: bool | None = field(default=None)
 
-    def format(self, readme: bool = False) -> str:
+    def format(self) -> str:
         if self.error is not None:
             return json.dumps(
                 {
@@ -53,14 +48,12 @@ class MsInfo:
         else:
             obj = asdict(self)
             obj.pop('error')
-            if not readme:
-                obj.pop('readme')
             return json.dumps(obj, ensure_ascii=False, indent=2)
 
     def __repr__(self):
         return self.format()
 
-    def to_dict(self, type: Literal['error', 'config', 'output']) -> dict:
+    def to_dict(self, type: Literal['error', 'output']) -> dict:
         obj = asdict(self)
         if self.category == 'model':
             obj.pop('lifecycle')
@@ -73,18 +66,11 @@ class MsInfo:
                     'date_crawl': self.date_crawl,
                     'error': self.error,
                 }
-            case 'config':
-                obj.pop('date_crawl')
-                obj.pop('downloads')
-                obj.pop('likes')
-                obj.pop('error')
             case 'output':
-                obj.pop('readme')
                 obj.pop('error')
         return obj
 
     def update_from_config(self, conf: dict):
-        self.readme = conf.get('readme', '')
         self.modality = conf.get('modality', None)
         self.lifecycle = conf.get('lifecycle', None)
         self.valid = conf.get('valid', None)
@@ -146,7 +132,6 @@ class MsCrawler:
                     info.downloads,
                     info.likes,
                     link,
-                    info.readme_content,
                 )
             except Exception:
                 error = traceback.format_exc()
@@ -169,7 +154,6 @@ class MsCrawler:
                         info.downloads,
                         info.likes,
                         link,
-                        info.readme_content,
                     )
 
     def _fetch_from_repo(
@@ -208,9 +192,6 @@ class MsCrawler:
                     if category == 'dataset':
                         assert isinstance(res.id, str)
                         res.name = res.id.split('/')[-1]
-                    res.readme_content = self._fetch_readme_content(
-                        f'{res.author}/{res.name}', category
-                    )
                     yield res, None
             except Exception:
                 # TODO: The error retry mechanism needs improvement; currently, if an exception occurs, the code cannot identify on which page the exception was encountered.
@@ -252,7 +233,7 @@ class MsCrawler:
             logger.exception(f'Exception when fetch num of {category} of {repo}')
             raise
 
-    def _fetch_readme_content(self, identifier, category: Literal['model', 'dataset']) -> str:
+    def fetch_readme_content(self, identifier, category: Literal['model', 'dataset']) -> str:
         try:
             info = self.retrier(self.api.repo_info, identifier, repo_type=category)
             if isinstance(info.readme_content, str):

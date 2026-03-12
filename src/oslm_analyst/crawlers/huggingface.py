@@ -1,3 +1,4 @@
+from oslm_analyst.processors.modality import Modality, Lifecycle
 import re
 from huggingface_hub.errors import HfHubHTTPError
 import json
@@ -29,18 +30,12 @@ class HfInfo:
     discussions: int | None = field(default=None)
     discussion_msg: int | None = field(default=None)
     link: str | None = field(default=None)
-    readme: str | None = field(default=None)
     error: str | None = field(default=None)
-    modality: (
-        Literal['Language', 'Speech', 'Vision', 'Multimodal', 'Vector', 'Protein', '3D', 'Embodied']
-        | None
-    ) = field(default=None)
-    lifecycle: Literal['Pre-training', 'Fine-tuning', 'Preference', 'Evaluation'] | None = field(
-        default=None
-    )
+    modality: Modality | None = field(default=None)
+    lifecycle: Lifecycle | None = field(default=None)
     valid: bool | None = field(default=None)
 
-    def format(self, readme: bool = False) -> str:
+    def format(self) -> str:
         if self.error is not None:
             return json.dumps(
                 {
@@ -56,14 +51,12 @@ class HfInfo:
         else:
             obj = asdict(self)
             obj.pop('error')
-            if not readme:
-                obj.pop('readme')
             return json.dumps(obj, ensure_ascii=False, indent=2)
 
     def __repr__(self):
         return self.format()
 
-    def to_dict(self, type: Literal['error', 'config', 'output']) -> dict:
+    def to_dict(self, type: Literal['error', 'output']) -> dict:
         obj = asdict(self)
         if self.category == 'model':
             obj.pop('lifecycle')
@@ -76,20 +69,11 @@ class HfInfo:
                     'date_crawl': self.date_crawl,
                     'error': self.error,
                 }
-            case 'config':
-                obj.pop('date_crawl')
-                obj.pop('downloads_last_month')
-                obj.pop('likes')
-                obj.pop('discussions')
-                obj.pop('discussion_msg')
-                obj.pop('error')
             case 'output':
-                obj.pop('readme')
                 obj.pop('error')
         return obj
 
     def update_from_config(self, conf: dict):
-        self.readme = conf.get('readme', '')
         self.modality = conf.get('modality', None)
         self.lifecycle = conf.get('lifecycle', None)
         self.valid = conf.get('valid', None)
@@ -150,7 +134,6 @@ class HfCrawler:
             try:
                 info = self._fetch_from_identifier(identifier, category)
                 disc, msg = self._fetch_discussions_count(identifier, category)
-                readme = self._fetch_readme_content(identifier, category)
                 link = base_link + '/' + identifier
                 yield HfInfo(
                     repo,
@@ -162,7 +145,6 @@ class HfCrawler:
                     disc,
                     msg,
                     link,
-                    readme,
                 )
             except Exception:
                 error = traceback.format_exc()
@@ -178,7 +160,6 @@ class HfCrawler:
                     identifier = info.id
                     try:
                         disc, msg = self._fetch_discussions_count(identifier, category)
-                        readme = self._fetch_readme_content(identifier, category)
                         link = base_link + '/' + identifier
                         yield HfInfo(
                             repo,
@@ -190,7 +171,6 @@ class HfCrawler:
                             disc,
                             msg,
                             link,
-                            readme,
                         )
                     except Exception:
                         error = traceback.format_exc()
@@ -289,7 +269,7 @@ class HfCrawler:
                 logger.exception(f'Exception when fetch discussion from {identifier}')
                 return total_count, total_msg
 
-    def _fetch_readme_content(self, identifier, category: Literal['model', 'dataset']) -> str:
+    def fetch_readme_content(self, identifier, category: Literal['model', 'dataset']) -> str:
         try:
             match category:
                 case 'model':

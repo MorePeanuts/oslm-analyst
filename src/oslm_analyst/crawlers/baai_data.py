@@ -24,13 +24,8 @@ class BAAIDataInfo:
     )
     valid: bool | None = field(default=None)
 
-    def to_dict(self, type: Literal['config', 'output']):
-        obj = asdict(self)
-        if type == 'config':
-            obj.pop('downloads')
-            obj.pop('likes')
-            obj.pop('date_crawl')
-        return obj
+    def to_dict(self):
+        return asdict(self)
 
     def update_from_config(self, conf: dict):
         self.modality = conf.get('modality', None)

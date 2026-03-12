@@ -55,3 +55,16 @@ def str2int(s: str | None) -> int:
             return int(s)
     except ValueError as e:
         raise Exception('str2int error') from e
+
+
+def format_identifier(repo, name):
+    return f'{repo}/{name}'
+
+
+def format_identifier_from_dict(obj: dict):
+    return f'{obj.get("repo")}/{obj.get("name")}'
+
+
+def parse_identifier(identifier: str):
+    lst = identifier.split('/')
+    return lst[0], lst[1]
