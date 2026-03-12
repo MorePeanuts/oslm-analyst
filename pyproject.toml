@@ -10,6 +10,8 @@ requires-python = ">=3.12"
 dependencies = [
   "huggingface-hub>=1.2.1",
   "jsonlines>=4.0.0",
+  "langchain>=1.2.12",
+  "langchain-openai>=1.1.11",
   "loguru>=0.7.3",
   "modelscope>=1.33.0",
   "pandas>=2.3.3",

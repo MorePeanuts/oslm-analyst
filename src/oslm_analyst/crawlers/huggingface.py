@@ -65,7 +65,6 @@ class HfInfo:
 
     def to_dict(self, type: Literal['error', 'config', 'output']) -> dict:
         obj = asdict(self)
-        obj.pop('category')
         if self.category == 'model':
             obj.pop('lifecycle')
         match type:

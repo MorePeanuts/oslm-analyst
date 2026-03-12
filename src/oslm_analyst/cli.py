@@ -1,3 +1,5 @@
+import re
+from oslm_analyst.processors.modality import ModalityAIHelper
 import typer
 from typer import Argument, Option
 from typing import Annotated, Literal
@@ -190,32 +192,38 @@ def crawl(
 
 
 @process_app.command('gen-modality')
-def process_modality():
-    """ """
-    pass
+def process_modality(
+    inp_path: Annotated[
+        str,
+        Argument(
+            help='Specify the data source (consistent with the path output by the crawl command), for example, huggingface_2026-01-01'
+        ),
+    ],
+):
+    """
+    Generate modal and lifecycle information for all raw data in the specified directory, while updating the configuration file.
+    """
+    ai_helper = ModalityAIHelper()
+    inp_dir = Path(inp_path)
+    platform = inp_dir.name.split('_')[0]
+    logger.info(
+        f'Generate modality and lifecycle information for raw data in {inp_path} ({platform})'
+    )
+    match platform:
+        case 'huggingface':
+            conf_path = Path(__file__).parents[2] / 'config/hf_config.jsonl'
+        case 'modelscope':
+            conf_path = Path(__file__).parents[2] / 'config/ms_config.jsonl'
+        case 'baai-datahub':
+            conf_path = Path(__file__).parents[2] / 'config/baai_config.jsonl'
+
+    ai_helper.update_config(conf_path)
 
 
 @process_app.command('osir-lmts')
 def process_osir_lmts():
     """ """
     pass
-
-
-@app.command()
-def rank(
-    date: Annotated[
-        str,
-        Argument(
-            default_factory=today,
-            help='Ranking based on data up to date specified by this argument (today by default).',
-        ),
-    ],
-):
-    """
-    Ranking calculation based on the open-source influence evaluation criteria of large
-    model technology for data obtained through web crawling.
-    """
-    print(date)
 
 
 @app.command()
