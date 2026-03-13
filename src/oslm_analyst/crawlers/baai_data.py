@@ -14,6 +14,7 @@ class BAAIDataInfo:
     likes: int | None = field()
     date_crawl: str = field()
     link: str = field()
+    profile: str = field()
     category: str = field(default='dataset')
     modality: (
         Literal['Language', 'Speech', 'Vision', 'Multimodal', 'Vector', 'Protein', '3D', 'Embodied']
@@ -59,6 +60,7 @@ class BAAIDataCrawler:
                         likes=info['subscribedNumb'],
                         date_crawl=date_crawl,
                         link=link,
+                        profile=info['profiles'],
                     )
                 )
             return res
