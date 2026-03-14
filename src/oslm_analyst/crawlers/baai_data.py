@@ -1,37 +1,13 @@
-import requests
-from typing import Literal
-from loguru import logger
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from dataclasses import dataclass, field, asdict
+from typing import Literal
+
+import requests
+from loguru import logger
+
+from oslm_analyst.data_utils import BAAIDataInfo
+
 from ..utils import today
-
-
-@dataclass
-class BAAIDataInfo:
-    repo: str = field(init=False, default='BAAI')
-    name: str = field()
-    downloads: int | None = field()
-    likes: int | None = field()
-    date_crawl: str = field()
-    link: str = field()
-    profile: str = field()
-    category: str = field(default='dataset')
-    modality: (
-        Literal['Language', 'Speech', 'Vision', 'Multimodal', 'Vector', 'Protein', '3D', 'Embodied']
-        | None
-    ) = field(default=None)
-    lifecycle: Literal['Pre-training', 'Fine-tuning', 'Preference', 'Evaluation'] | None = field(
-        default=None
-    )
-    valid: bool | None = field(default=None)
-
-    def to_dict(self):
-        return asdict(self)
-
-    def update_from_extra_info(self, conf: dict):
-        self.modality = conf.get('modality', None)
-        self.lifecycle = conf.get('lifecycle', None)
-        self.valid = conf.get('valid', None)
 
 
 class BAAIDataCrawler:

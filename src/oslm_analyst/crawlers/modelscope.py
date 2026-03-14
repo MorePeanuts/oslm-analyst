@@ -1,79 +1,23 @@
-from oslm_analyst.processors.modality import Modality, Lifecycle
-from functools import partial
-from requests.exceptions import HTTPError
-from tenacity import (
-    Retrying,
-    stop_after_attempt,
-    RetryError,
-    retry_if_exception,
-)
 import json
 import traceback
-from oslm_analyst.utils import today
 from collections.abc import Iterator
+from dataclasses import asdict, dataclass, field
+from functools import partial
 from typing import Literal
-from dataclasses import dataclass, field, asdict
-from modelscope.hub.api import HubApi
-from modelscope.hub.info import ModelInfo, DatasetInfo
+
 from loguru import logger
+from modelscope.hub.api import HubApi
+from modelscope.hub.info import DatasetInfo, ModelInfo
+from requests.exceptions import HTTPError
+from tenacity import (
+    RetryError,
+    Retrying,
+    retry_if_exception,
+    stop_after_attempt,
+)
 
-
-@dataclass
-class MsInfo:
-    repo: str
-    name: str
-    category: Literal['model', 'dataset']
-    date_crawl: str
-    downloads: int | None = field(default=None)
-    likes: int | None = field(default=None)
-    link: str | None = field(default=None)
-    error: str | None = field(default=None)
-    modality: Modality | None = field(default=None)
-    lifecycle: Lifecycle | None = field(default=None)
-    valid: bool | None = field(default=None)
-
-    def format(self) -> str:
-        if self.error is not None:
-            return json.dumps(
-                {
-                    'repo': self.repo,
-                    'name': self.name,
-                    'category': self.category,
-                    'date_crawl': self.date_crawl,
-                    'error': self.error,
-                },
-                ensure_ascii=False,
-                indent=2,
-            )
-        else:
-            obj = asdict(self)
-            obj.pop('error')
-            return json.dumps(obj, ensure_ascii=False, indent=2)
-
-    def __repr__(self):
-        return self.format()
-
-    def to_dict(self, type: Literal['error', 'output']) -> dict:
-        obj = asdict(self)
-        if self.category == 'model':
-            obj.pop('lifecycle')
-        match type:
-            case 'error':
-                return {
-                    'repo': self.repo,
-                    'name': self.name,
-                    'category': self.category,
-                    'date_crawl': self.date_crawl,
-                    'error': self.error,
-                }
-            case 'output':
-                obj.pop('error')
-        return obj
-
-    def update_from_extra_info(self, conf: dict):
-        self.modality = conf.get('modality', None)
-        self.lifecycle = conf.get('lifecycle', None)
-        self.valid = conf.get('valid', None)
+from oslm_analyst.data_utils import MsInfo
+from oslm_analyst.utils import today
 
 
 def _is_rate_limit_error(exception):

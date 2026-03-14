@@ -1,82 +1,25 @@
-from oslm_analyst.processors.modality import Modality, Lifecycle, ModelExtraInfo, DatasetExtraInfo
-import re
-from huggingface_hub.errors import HfHubHTTPError
 import json
+import re
 import traceback
-from loguru import logger
-from typing import Literal
 from collections.abc import Iterator
-from dataclasses import dataclass, field, asdict
-from huggingface_hub import HfApi, ModelCard, DatasetCard
-from huggingface_hub.hf_api import ModelInfo, DatasetInfo
+from dataclasses import asdict, dataclass, field
+from typing import Literal
+
+from huggingface_hub import DatasetCard, HfApi, ModelCard
+from huggingface_hub.errors import HfHubHTTPError
+from huggingface_hub.hf_api import DatasetInfo, ModelInfo
+from loguru import logger
 from tenacity import (
-    Retrying,
     RetryError,
-    stop_after_attempt,
+    Retrying,
     retry_if_exception,
+    stop_after_attempt,
 )
-from .crawl_utils import str2int
+
+from oslm_analyst.data_utils import HfInfo
+
 from ..utils import today
-
-
-@dataclass
-class HfInfo:
-    repo: str
-    name: str
-    category: Literal['model', 'dataset']
-    date_crawl: str
-    downloads_last_month: int | None = field(default=None)
-    likes: int | None = field(default=None)
-    discussions: int | None = field(default=None)
-    discussion_msg: int | None = field(default=None)
-    link: str | None = field(default=None)
-    error: str | None = field(default=None)
-    modality: Modality | None = field(default=None)
-    lifecycle: Lifecycle | None = field(default=None)
-    valid: bool | None = field(default=None)
-
-    def format(self) -> str:
-        if self.error is not None:
-            return json.dumps(
-                {
-                    'repo': self.repo,
-                    'name': self.name,
-                    'category': self.category,
-                    'date_crawl': self.date_crawl,
-                    'error': self.error,
-                },
-                ensure_ascii=False,
-                indent=2,
-            )
-        else:
-            obj = asdict(self)
-            obj.pop('error')
-            return json.dumps(obj, ensure_ascii=False, indent=2)
-
-    def __repr__(self):
-        return self.format()
-
-    def to_dict(self, type: Literal['error', 'output']) -> dict:
-        obj = asdict(self)
-        if self.category == 'model':
-            obj.pop('lifecycle')
-        match type:
-            case 'error':
-                return {
-                    'repo': self.repo,
-                    'name': self.name,
-                    'category': self.category,
-                    'date_crawl': self.date_crawl,
-                    'error': self.error,
-                }
-            case 'output':
-                obj.pop('error')
-        return obj
-
-    def update_from_extra_info(self, conf: dict):
-        self.modality = conf.get('modality', None)
-        self.lifecycle = conf.get('lifecycle', None)
-        self.valid = conf.get('valid', None)
+from .crawl_utils import str2int
 
 
 def _is_rate_limit_error(exception):

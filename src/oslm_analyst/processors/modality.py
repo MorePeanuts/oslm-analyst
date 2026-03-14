@@ -1,75 +1,17 @@
-from oslm_analyst.crawlers.modelscope import MsCrawler
-from oslm_analyst.crawlers.huggingface import HfCrawler
-from dataclasses import dataclass, asdict
-from httpx import delete
-from oslm_analyst.crawlers.crawl_utils import format_identifier_from_dict
 import tempfile
-import jsonlines
-from pathlib import Path
-from typing import TypeAlias, Literal
+from dataclasses import asdict, dataclass
 from enum import Enum
+from pathlib import Path
+from typing import Literal, TypeAlias
+
+import jsonlines
+from httpx import delete
 from langchain import chat_models
 
-
-class Modality(str, Enum):
-    Language = 'Language'
-    Speech = 'Speech'
-    Vision = 'Vision'
-    Multimodal = 'Multimodal'
-    Vector = 'Vector'
-    Protein = 'Protein'
-    ThreeDim = '3D'
-    Embodied = 'Embodied'
-
-
-class Lifecycle(str, Enum):
-    Pretraining = 'Pre-training'
-    Finetuning = 'Fine-tuning'
-    Preference = 'Preference'
-    Evaluation = 'Evaluation'
-
-
-@dataclass
-class ModelExtraInfo:
-    repo: str
-    name: str
-    modality: Modality
-    valid: bool
-    link: str
-
-    @classmethod
-    def from_dict(cls, obj: dict) -> 'ModelExtraInfo':
-        return cls(obj['repo'], obj['name'], obj['modality'], obj['valid'], obj['link'])
-
-    @classmethod
-    def from_dataclass(cls, obj) -> 'ModelExtraInfo':
-        return cls(obj.repo, obj.name, obj.modality, obj.valid, obj.link)
-
-    def to_dict(self) -> dict:
-        return asdict(self)
-
-
-@dataclass
-class DatasetExtraInfo:
-    repo: str
-    name: str
-    modality: Modality
-    lifecycle: Lifecycle
-    valid: bool
-    link: str
-
-    @classmethod
-    def from_dict(cls, obj: dict) -> 'DatasetExtraInfo':
-        return cls(
-            obj['repo'], obj['name'], obj['modality'], obj['lifecycle'], obj['valid'], obj['link']
-        )
-
-    @classmethod
-    def from_dataclass(cls, obj) -> 'DatasetExtraInfo':
-        return cls(obj.repo, obj.name, obj.modality, obj.lifecycle, obj.valid, obj.link)
-
-    def to_dict(self) -> dict:
-        return asdict(self)
+from oslm_analyst.crawlers.crawl_utils import format_identifier_from_dict
+from oslm_analyst.crawlers.huggingface import HfCrawler
+from oslm_analyst.crawlers.modelscope import MsCrawler
+from oslm_analyst.data_utils import DatasetExtraInfo, Lifecycle, Modality, ModelExtraInfo
 
 
 class ModalityAIHelper:
