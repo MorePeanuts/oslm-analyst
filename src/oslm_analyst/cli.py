@@ -194,24 +194,30 @@ def crawl(
 @process_app.command('gen-modality')
 def process_modality(
     inp_path: Annotated[
-        str,
+        str | None,
         Argument(
             help='Specify the data source (consistent with the path output by the crawl command), for example, huggingface_2026-01-01'
         ),
-    ],
+    ] = None,
 ):
     """
     Generate modal and lifecycle information for all raw data in the specified directory, while updating the configuration file.
     """
+    ai_helper = ModalityAIHelper()
+    ai_helper.update_extra_info()
+    if inp_path is None:
+        return
     inp_dir = Path(inp_path)
     platform = inp_dir.name.split('_')[0]
     logger.info(
         f'Generate modality and lifecycle information for raw data in {inp_path} ({platform})'
     )
-    ai_helper = ModalityAIHelper()
-    ai_helper.update_extra_info()
-    ai_helper.update_raw_data(inp_dir / 'raw_dataset_data.jsonl', 'dataset')
-    ai_helper.update_raw_data(inp_dir / 'raw_model_data.jsonl', 'model')
+    if (inp_dir / 'raw_dataset_data.jsonl').exists():
+        logger.info('Generate modality and lifecycle for dataset data.')
+        ai_helper.update_raw_data(inp_dir / 'raw_dataset_data.jsonl', 'dataset')
+    if (inp_dir / 'raw_model_data.jsonl').exists():
+        logger.info('Generate modality for model data.')
+        ai_helper.update_raw_data(inp_dir / 'raw_model_data.jsonl', 'model')
 
 
 @process_app.command('osir-lmts')
