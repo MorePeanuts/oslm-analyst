@@ -157,7 +157,9 @@ class ModalityAIHelper:
                     for line in reader:
                         identifier = format_identifier_from_dict(line)
                         # Skip if already has valid and modality filled
-                        if line.get('valid') is not None and line.get('modality') is not None:
+                        if not line.get('valid') or (
+                            line.get('valid') is not None and line.get('modality') is not None
+                        ):
                             logger.trace(f'Skipping model {identifier} - already classified')
                             writer.write(line)
                             continue
@@ -190,7 +192,7 @@ class ModalityAIHelper:
                     for line in reader:
                         identifier = format_identifier_from_dict(line)
                         # Skip if already has valid, modality and lifecycle filled
-                        if (
+                        if not line.get('valid') or (
                             line.get('valid') is not None
                             and line.get('modality') is not None
                             and line.get('lifecycle') is not None
