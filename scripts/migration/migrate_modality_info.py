@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Migrate data from model_modality.json and dataset_modality.json
 to model_info.jsonl and dataset_info.jsonl.

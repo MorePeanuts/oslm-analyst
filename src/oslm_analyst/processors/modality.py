@@ -237,13 +237,30 @@ class ModalityAIHelper:
                     else:
                         model_info[identifier] = ModelExtraInfo.from_dict(line)
                     data.append(line)
-            with (
-                jsonlines.open(self.model_info_path, 'w') as writer1,
-                jsonlines.open(data_path, 'w') as writer2,
-            ):
-                for v in model_info.values():
-                    writer1.write(v.to_dict())
-                writer2.write_all(data)
+            # Write model_info to temp file first
+            with tempfile.NamedTemporaryFile(
+                'w',
+                dir=self.model_info_path.parent,
+                suffix='.jsonl',
+                delete=False,
+                encoding='utf-8',
+            ) as tf1:
+                with jsonlines.Writer(tf1) as writer1:
+                    for v in model_info.values():
+                        writer1.write(v.to_dict())
+            # Write data to temp file first
+            with tempfile.NamedTemporaryFile(
+                'w',
+                dir=data_path.parent,
+                suffix='.jsonl',
+                delete=False,
+                encoding='utf-8',
+            ) as tf2:
+                with jsonlines.Writer(tf2) as writer2:
+                    writer2.write_all(data)
+            # Atomic replace
+            Path(tf1.name).replace(self.model_info_path)
+            Path(tf2.name).replace(data_path)
         elif category == 'dataset':
             dataset_info: dict[str, DatasetExtraInfo] = {}
             if self.dataset_info_path.exists():
@@ -265,13 +282,30 @@ class ModalityAIHelper:
                     else:
                         dataset_info[identifier] = DatasetExtraInfo.from_dict(line)
                     data.append(line)
-            with (
-                jsonlines.open(self.dataset_info_path, 'w') as writer1,
-                jsonlines.open(data_path, 'w') as writer2,
-            ):
-                for v in dataset_info.values():
-                    writer1.write(v.to_dict())
-                writer2.write_all(data)
+            # Write dataset_info to temp file first
+            with tempfile.NamedTemporaryFile(
+                'w',
+                dir=self.dataset_info_path.parent,
+                suffix='.jsonl',
+                delete=False,
+                encoding='utf-8',
+            ) as tf1:
+                with jsonlines.Writer(tf1) as writer1:
+                    for v in dataset_info.values():
+                        writer1.write(v.to_dict())
+            # Write data to temp file first
+            with tempfile.NamedTemporaryFile(
+                'w',
+                dir=data_path.parent,
+                suffix='.jsonl',
+                delete=False,
+                encoding='utf-8',
+            ) as tf2:
+                with jsonlines.Writer(tf2) as writer2:
+                    writer2.write_all(data)
+            # Atomic replace
+            Path(tf1.name).replace(self.dataset_info_path)
+            Path(tf2.name).replace(data_path)
 
     def classify_model(self, identifier: str, link: str, readme: str) -> ModelClassification:
         """Classify a model repository: validity + modality."""
