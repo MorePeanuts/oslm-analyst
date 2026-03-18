@@ -230,7 +230,62 @@ def migrate_model_info(
         modality = info.get('modality')
         is_large_model = info.get('is_large_model', True)
 
-        # Determine platform and link
+        # Check if already exists first to avoid unnecessary API calls
+        if full_id in existing:
+            existing_entry = existing[full_id]
+
+            # Case 1: Existing entry has complete data and matches - skip API call
+            if (
+                existing_entry.get('modality') is not None
+                and existing_entry.get('valid') is not None
+                and existing_entry.get('modality') == modality
+                and existing_entry.get('valid') == is_large_model
+            ):
+                result.append(existing_entry)
+                skipped_count += 1
+                continue
+
+            # Case 2: Existing entry has null values or data changed - still need to build entry
+            # But can keep existing link if available
+            link = existing_entry.get('link')
+            if link is None:
+                # Only build link if not available
+                if skip_platform_check or checker is None:
+                    platform = None
+                else:
+                    platform = checker.get_model_platform(full_id)
+                    if platform:
+                        logger.debug(f'[{idx + 1}/{len(model_data)}] Model {full_id} found on {platform}')
+                    else:
+                        logger.warning(
+                            f'[{idx + 1}/{len(model_data)}] Model {full_id} not found on any platform'
+                        )
+                link = build_link(platform, full_id, 'model')
+
+            # Create entry
+            entry = {
+                'repo': repo,
+                'name': name,
+                'modality': modality,
+                'valid': is_large_model,
+                'link': link,
+            }
+
+            # Check if we're filling null values
+            filled_fields = []
+            if existing_entry.get('modality') is None and modality is not None:
+                filled_fields.append('modality')
+            if existing_entry.get('valid') is None and is_large_model is not None:
+                filled_fields.append('valid')
+            if filled_fields:
+                null_filled_count += 1
+                logger.info(f'Filling null fields for model {full_id}: {", ".join(filled_fields)}')
+
+            result.append(entry)
+            updated_count += 1
+            continue
+
+        # Case 3: New entry - need full processing
         if skip_platform_check or checker is None:
             platform = None
         else:
@@ -253,38 +308,8 @@ def migrate_model_info(
             'link': link,
         }
 
-        # Check if already exists
-        if full_id in existing:
-            existing_entry = existing[full_id]
-
-            # Case 1: Existing entry has null values - use source data to fill
-            if existing_entry.get('modality') is None or existing_entry.get('valid') is None:
-                # Keep existing link if available
-                if existing_entry.get('link'):
-                    entry['link'] = existing_entry['link']
-                # Fill null values from source
-                if existing_entry.get('modality') is None and modality is not None:
-                    null_filled_count += 1
-                    logger.info(f'Filling null modality for model {full_id}: {modality}')
-                result.append(entry)
-                updated_count += 1
-                continue
-
-            # Case 2: Existing entry has data, check if same
-            if (
-                existing_entry.get('modality') == entry['modality']
-                and existing_entry.get('valid') == entry['valid']
-            ):
-                result.append(existing_entry)
-                skipped_count += 1
-                continue
-
-            # Case 3: Data changed - update
-            updated_count += 1
-        else:
-            updated_count += 1
-
         result.append(entry)
+        updated_count += 1
 
     # Keep existing entries not in source file
     for full_id, entry in existing.items():
@@ -344,7 +369,71 @@ def migrate_dataset_info(
         lifecycle = info.get('lifecycle')
         is_valid = info.get('is_valid', True)
 
-        # Determine platform and link
+        # Check if already exists first to avoid unnecessary API calls
+        if full_id in existing:
+            existing_entry = existing[full_id]
+
+            # Case 1: Existing entry has complete data and matches - skip API call
+            if (
+                existing_entry.get('modality') is not None
+                and existing_entry.get('lifecycle') is not None
+                and existing_entry.get('valid') is not None
+                and existing_entry.get('modality') == modality
+                and existing_entry.get('lifecycle') == lifecycle
+                and existing_entry.get('valid') == is_valid
+            ):
+                result.append(existing_entry)
+                skipped_count += 1
+                continue
+
+            # Case 2: Existing entry has null values or data changed - still need to build entry
+            # But can keep existing link if available
+            link = existing_entry.get('link')
+            if link is None:
+                # Only build link if not available
+                if skip_platform_check or checker is None:
+                    platform = None
+                else:
+                    platform = checker.get_dataset_platform(full_id)
+                    if platform:
+                        logger.debug(
+                            f'[{idx + 1}/{len(dataset_data)}] Dataset {full_id} found on {platform}'
+                        )
+                    else:
+                        logger.warning(
+                            f'[{idx + 1}/{len(dataset_data)}] Dataset {full_id} not found on any platform'
+                        )
+                link = build_link(platform, full_id, 'dataset')
+
+            # Create entry
+            entry = {
+                'repo': repo,
+                'name': name,
+                'modality': modality,
+                'lifecycle': lifecycle,
+                'valid': is_valid,
+                'link': link,
+            }
+
+            # Count if we filled any null values
+            filled_fields = []
+            if existing_entry.get('modality') is None and modality is not None:
+                filled_fields.append('modality')
+            if existing_entry.get('lifecycle') is None and lifecycle is not None:
+                filled_fields.append('lifecycle')
+            if existing_entry.get('valid') is None and is_valid is not None:
+                filled_fields.append('valid')
+            if filled_fields:
+                null_filled_count += 1
+                logger.info(
+                    f'Filling null fields for dataset {full_id}: {", ".join(filled_fields)}'
+                )
+
+            result.append(entry)
+            updated_count += 1
+            continue
+
+        # Case 3: New entry - need full processing
         if skip_platform_check or checker is None:
             platform = None
         else:
@@ -370,50 +459,8 @@ def migrate_dataset_info(
             'link': link,
         }
 
-        # Check if already exists
-        if full_id in existing:
-            existing_entry = existing[full_id]
-
-            # Case 1: Existing entry has null values - use source data to fill
-            if (
-                existing_entry.get('modality') is None
-                or existing_entry.get('lifecycle') is None
-                or existing_entry.get('valid') is None
-            ):
-                # Keep existing link if available
-                if existing_entry.get('link'):
-                    entry['link'] = existing_entry['link']
-                # Count if we filled any null values
-                filled_fields = []
-                if existing_entry.get('modality') is None and modality is not None:
-                    filled_fields.append('modality')
-                if existing_entry.get('lifecycle') is None and lifecycle is not None:
-                    filled_fields.append('lifecycle')
-                if filled_fields:
-                    null_filled_count += 1
-                    logger.info(
-                        f'Filling null fields for dataset {full_id}: {", ".join(filled_fields)}'
-                    )
-                result.append(entry)
-                updated_count += 1
-                continue
-
-            # Case 2: Existing entry has data, check if same
-            if (
-                existing_entry.get('modality') == entry['modality']
-                and existing_entry.get('lifecycle') == entry['lifecycle']
-                and existing_entry.get('valid') == entry['valid']
-            ):
-                result.append(existing_entry)
-                skipped_count += 1
-                continue
-
-            # Case 3: Data changed - update
-            updated_count += 1
-        else:
-            updated_count += 1
-
         result.append(entry)
+        updated_count += 1
 
     # Keep existing entries not in source file
     for full_id, entry in existing.items():
