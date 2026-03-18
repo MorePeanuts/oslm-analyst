@@ -106,6 +106,8 @@ class PlatformChecker:
         except RetryError:
             logger.error(f'Failed to check HF model {repo_id} after retries')
             return False
+        except Exception:
+            return False
 
     def check_hf_dataset(self, repo_id: str) -> bool:
         """Check if dataset exists on HuggingFace."""
@@ -121,6 +123,8 @@ class PlatformChecker:
             return False
         except RetryError:
             logger.error(f'Failed to check HF dataset {repo_id} after retries')
+            return False
+        except Exception:
             return False
 
     def check_ms_model(self, repo_id: str) -> bool:
