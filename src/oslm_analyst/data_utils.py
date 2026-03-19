@@ -193,13 +193,8 @@ class BAAIDataInfo:
     link: str = field()
     profile: str = field()
     category: str = field(default='dataset')
-    modality: (
-        Literal['Language', 'Speech', 'Vision', 'Multimodal', 'Vector', 'Protein', '3D', 'Embodied']
-        | None
-    ) = field(default=None)
-    lifecycle: Literal['Pre-training', 'Fine-tuning', 'Preference', 'Evaluation'] | None = field(
-        default=None
-    )
+    modality: Modality | None = field(default=None)
+    lifecycle: Lifecycle | None = field(default=None)
     valid: bool | None = field(default=None)
 
     def to_dict(self):
