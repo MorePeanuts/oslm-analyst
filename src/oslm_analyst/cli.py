@@ -41,7 +41,7 @@ def analyze(
 @app.command()
 def crawl(
     platform: Annotated[
-        Literal['huggingface', 'modelscope', 'open-datalab', 'baai-datahub'],
+        Literal['huggingface', 'modelscope', 'baai-datahub'],
         Argument(help='Used to specify the platform from which data is to be crawled.'),
     ] = 'huggingface',
     target: Annotated[

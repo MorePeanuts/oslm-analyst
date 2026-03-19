@@ -7,6 +7,7 @@ from oslm-crawler/data/{date}/{platform}/ to OSLM-Analyst/output/{platform}_{dat
 
 import json
 import sys
+import re
 from pathlib import Path
 from loguru import logger
 import jsonlines
@@ -188,9 +189,8 @@ def main():
         description='Migrate data from oslm-crawler to OSLM-Analyst format.'
     )
     parser.add_argument(
-        '--crawler-data-dir',
+        'crawler_data_dir',
         type=Path,
-        default=Path(__file__).parents[2] / 'oslm-crawler' / 'data',
         help='Path to oslm-crawler/data directory',
     )
     parser.add_argument(
@@ -229,8 +229,9 @@ def main():
             sys.exit(1)
     else:
         # Migrate all dates
+        date_pattern = re.compile(r'^\d{4}-\d{2}-\d{2}$')
         for date_dir in sorted(crawler_data_dir.iterdir()):
-            if date_dir.is_dir() and date_dir.name.match('????-??-??'):
+            if date_dir.is_dir() and date_pattern.match(date_dir.name):
                 logger.info(f'Migrating data for date: {date_dir.name}')
                 total_migrated += migrate_date_directory(date_dir, output_dir)
 

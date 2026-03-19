@@ -51,12 +51,7 @@ class ModalityAIHelper:
             )
             self.llm = None
         else:
-            self.llm = ChatOpenAI(
-                model=model,
-                api_key=api_key,
-                base_url=base_url,
-                temperature=0,
-            )
+            self.llm = ChatOpenAI(model=model, api_key=api_key, base_url=base_url, temperature=0)  # type: ignore
 
         # Build chains
         self._build_chains()
