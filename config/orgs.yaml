@@ -6,6 +6,8 @@
     - meta-llama
     - facebook
     - FacebookAI
+  metadata:
+    chips: 2
 
 - org: BAAI
   type: Non-Profit
@@ -20,6 +22,9 @@
   ms_accounts:
     - BAAI
     - RoboCOIN
+  metadata:
+    chips: 4
+    dataset_ops: 24
 
 - org: Baidu
   type: Company
@@ -31,6 +36,8 @@
     - ernie-research
   ms_accounts:
     - PaddlePaddle
+  metadata:
+    chips: 2
 
 - org: ShanghaiAILab
   type: Research Lab
@@ -51,6 +58,8 @@
     - OpenGVLab
     - Shanghai_AI_Laboratory
     - OpenDataLab
+  metadata:
+    chips: 1
 
 - org: Baichuan
   type: Company
@@ -60,6 +69,8 @@
     - baichuan-inc
   ms_accounts:
     - baichuan-inc
+  metadata:
+    chips: 1
 
 - org: Zhipu
   type: Company
@@ -71,6 +82,8 @@
     - THUDM-HF-SPACE
   ms_accounts:
     - ZhipuAI
+  metadata:
+    chips: 1
 
 - org: Ali
   type: Company
@@ -85,6 +98,9 @@
   ms_accounts:
     - Qwen
     - iic
+  metadata:
+    chips: 1
+    dataset_ops: 105
 
 - org: Huawei
   type: Company
@@ -93,6 +109,8 @@
   hf_accounts:
     - huawei-noah
     - HWERI
+  metadata:
+    chips: 2
 
 - org: LMSYS
   type: Research Lab
@@ -100,6 +118,8 @@
   focus: [LLM, Evaluation]
   hf_accounts:
     - lmsys
+  metadata:
+    chips: 1
 
 - org: Falcon
   type: Research Lab
@@ -107,6 +127,8 @@
   focus: [LLM]
   hf_accounts:
     - tiiuae
+  metadata:
+    chips: 1
 
 - org: EleutherAI
   type: Non-Profit
@@ -114,6 +136,8 @@
   focus: [LLM, Open-source]
   hf_accounts:
     - EleutherAI
+  metadata:
+    chips: 1
 
 - org: Google
   type: Company
@@ -125,6 +149,8 @@
     - google-t5
     - deepmind
     - google-research-datasets
+  metadata:
+    chips: 2
 
 - org: UKP Lab
   type: University
@@ -133,6 +159,8 @@
   hf_accounts:
     - sentence-transformers
     - UKPLab
+  metadata:
+    chips: 1
 
 - org: Microsoft
   type: Company
@@ -140,6 +168,8 @@
   focus: [LLM, Multimodal, Code]
   hf_accounts:
     - microsoft
+  metadata:
+    chips: 1
 
 - org: OpenAI
   type: Company
@@ -147,6 +177,8 @@
   focus: [LLM, Multimodal, AGI]
   hf_accounts:
     - openai
+  metadata:
+    chips: 1
 
 - org: HuggingFace
   type: Company
@@ -158,6 +190,8 @@
     - HuggingFaceTB
     - HuggingFaceFW
     - HuggingFaceH4
+  metadata:
+    chips: 1
 
 - org: Princeton NLP
   type: University
@@ -165,6 +199,8 @@
   focus: [NLP, LLM]
   hf_accounts:
     - princeton-nlp
+  metadata:
+    chips: 1
 
 - org: Deepseek
   type: Company
@@ -174,6 +210,8 @@
     - deepseek-ai
   ms_accounts:
     - deepseek-ai
+  metadata:
+    chips: 1
 
 - org: OpenBMB
   type: Non-Profit
@@ -183,6 +221,8 @@
     - openbmb
   ms_accounts:
     - OpenBMB
+  metadata:
+    chips: 1
 
 - org: 01-AI
   type: Company
@@ -192,6 +232,8 @@
     - 01-ai
   ms_accounts:
     - 01ai
+  metadata:
+    chips: 1
 
 - org: Nvidia
   type: Company
@@ -199,6 +241,8 @@
   focus: [LLM, Multimodal, Infrastructure]
   hf_accounts:
     - nvidia
+  metadata:
+    chips: 1
 
 - org: Ai2
   type: Non-Profit
@@ -206,6 +250,8 @@
   focus: [LLM, Open-source, Research]
   hf_accounts:
     - allenai
+  metadata:
+    chips: 1
 
 - org: Apple
   type: Company
@@ -213,6 +259,8 @@
   focus: [Multimodal, On-device AI]
   hf_accounts:
     - apple
+  metadata:
+    chips: 2
 
 - org: Tencent
   type: Company
@@ -227,6 +275,8 @@
     - Tencent-YouTu-Research
     - TencentARC
     - TencentBAC
+  metadata:
+    chips: 1
 
 - org: ByteDance
   type: Company
@@ -241,6 +291,8 @@
     - bytedance-research
     - ByteDance-Seed
     - BytedanceDouyinContent
+  metadata:
+    chips: 1
 
 - org: MistralAI
   type: Company
@@ -248,6 +300,8 @@
   focus: [LLM, Open-source]
   hf_accounts:
     - mistralai
+  metadata:
+    chips: 1
 
 - org: StanfordNLP
   type: University
@@ -255,6 +309,8 @@
   focus: [NLP, Research]
   hf_accounts:
     - stanfordnlp
+  metadata:
+    chips: 1
 
 - org: Moonshot
   type: Company
@@ -264,6 +320,8 @@
     - moonshotai
   ms_accounts:
     - moonshotai
+  metadata:
+    chips: 1
 
 - org: MLFoundations
   type: Research Lab
@@ -271,6 +329,8 @@
   focus: [Multimodal, Open-source]
   hf_accounts:
     - mlfoundations
+  metadata:
+    chips: 1
 
 - org: Salesforce
   type: Company
@@ -278,6 +338,8 @@
   focus: [LLM, Multimodal]
   hf_accounts:
     - Salesforce
+  metadata:
+    chips: 1
 
 - org: Meituan
   type: Company
@@ -289,6 +351,8 @@
   ms_accounts:
     - meituan-longcat
     - meituan
+  metadata:
+    chips: 1
 
 - org: Xiaomi
   type: Company
@@ -298,3 +362,5 @@
     - XiaomiMiMo
   ms_accounts:
     - XiaomiMiMo
+  metadata:
+    chips: 1

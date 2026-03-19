@@ -77,6 +77,7 @@ class OrgInfo:
     focus: list[str] = field(default_factory=list)
     hf_accounts: list[str] = field(default_factory=list)
     ms_accounts: list[str] = field(default_factory=list)
+    metadata: dict | None = field(default_factory=dict)
 
     @staticmethod
     def build_org_info_list_from_yaml(inp_path: str | Path) -> list['OrgInfo']:
@@ -99,6 +100,13 @@ class OrgInfo:
                     accounts = org_info.ms_accounts.copy()
             for repo in accounts:
                 res[repo] = org_info.org
+        return res
+
+    @staticmethod
+    def build_org_metadata(org_infos: list['OrgInfo']) -> dict[str, dict]:
+        res = {}
+        for org_info in org_infos:
+            res[org_info.org] = org_info.metadata or {}
         return res
 
     def expand_to_source_list(self, platform: str, category: str) -> list[Source]:
