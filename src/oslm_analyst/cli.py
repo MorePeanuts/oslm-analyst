@@ -199,11 +199,29 @@ def process_modality(
             help='Specify the data source (consistent with the path output by the crawl command), for example, huggingface_2026-01-01'
         ),
     ] = None,
+    api_key: Annotated[
+        str | None,
+        Option(
+            help='API key for the LLM service. If not provided, uses OPENAI_API_KEY environment variable.'
+        ),
+    ] = None,
+    base_url: Annotated[
+        str | None,
+        Option(
+            help='Base URL for the LLM service. If not provided, uses OPENAI_API_BASE environment variable.'
+        ),
+    ] = None,
+    model: Annotated[
+        str | None,
+        Option(
+            help='Model name to use. If not provided, uses OPENAI_MODEL_NAME environment variable or defaults to gpt-5.'
+        ),
+    ] = None,
 ):
     """
     Generate modal and lifecycle information for all raw data in the specified directory, while updating the configuration file.
     """
-    ai_helper = ModalityAIHelper()
+    ai_helper = ModalityAIHelper(api_key=api_key, base_url=base_url, model=model)
     ai_helper.update_extra_info()
     if inp_path is None:
         return

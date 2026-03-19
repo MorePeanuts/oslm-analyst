@@ -43,7 +43,7 @@ class ModalityAIHelper:
         # Initialize LLM - use provided params first, then env vars
         api_key = api_key or os.getenv('OPENAI_API_KEY', None)
         base_url = base_url or os.getenv('OPENAI_API_BASE', None)
-        model = model or os.getenv('OPENAI_MODEL_NAME', 'gpt-4o-mini')
+        model = model or os.getenv('OPENAI_MODEL_NAME', 'gpt-5')
 
         if not api_key:
             logger.warning(
