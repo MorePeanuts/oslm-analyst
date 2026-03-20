@@ -276,9 +276,9 @@ def process_osir_lmts(
     Output files:
     - model_data.jsonl / dataset_data.jsonl: Monthly delta data
     - acc_model_data.jsonl / acc_dataset_data.jsonl: Accumulated data since first month
-    - model_summary.csv / data_summary.csv: Summary by org/modality(/lifecycle) for current month
-    - acc_model_summary.csv / acc_data_summary.csv: Summary for accumulated data
-    - delta_model_summary.csv / delta_data_summary.csv: Delta summary (no ranking)
+    - model_summary.csv / dataset_summary.csv: Summary by org/modality(/lifecycle) for current month
+    - acc_model_summary.csv / acc_dataset_summary.csv: Summary for accumulated data
+    - delta_model_summary.csv / delta_dataset_summary.csv: Delta summary (no ranking)
     - infra_summary.csv: Copied from the provided source path (manually curated)
     - eval_summary.csv: Copied from the provided source path (manually curated)
     - model_rank.csv / dataset_rank.csv / infra_rank.csv / eval_rank.csv / overall_rank.csv: Rankings for current month

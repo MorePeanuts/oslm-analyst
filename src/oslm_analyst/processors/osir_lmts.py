@@ -549,7 +549,7 @@ class OsirLmtsProcessor:
         prefix: str = '',
         write_csv: bool = True,
     ) -> DatasetSummaryTable:
-        """Generate data_summary.csv using pandas."""
+        """Generate dataset_summary.csv using pandas."""
         org_data = DatasetSummaryRow.get_defaultdict()
 
         for di in dataset_infos:
@@ -612,7 +612,7 @@ class OsirLmtsProcessor:
         table = DatasetSummaryTable(rows=rows)
 
         if write_csv:
-            filename = f'{prefix}data_summary.csv' if prefix else 'data_summary.csv'
+            filename = f'{prefix}dataset_summary.csv' if prefix else 'dataset_summary.csv'
             table.to_csv(self.out_dir / filename)
             logger.info(f'Generated {filename} with {len(rows)} rows')
 
@@ -702,15 +702,15 @@ class OsirLmtsProcessor:
     def delta_dataset_data(self, dataset_table: DatasetSummaryTable) -> None:
         """Generate delta summary (current month - previous month)."""
         curr_df = dataset_table.to_dataframe()
-        prev_df = self._load_prev_month_summary('data_summary.csv')
+        prev_df = self._load_prev_month_summary('dataset_summary.csv')
         if prev_df is None:
             delta_df = pd.DataFrame(index=curr_df.index, columns=curr_df.columns)
         else:
             prev_df = prev_df.reindex(curr_df.index)
             delta_df = curr_df.sub(prev_df)
 
-        delta_df.to_csv(self.out_dir / 'delta_data_summary.csv', na_rep='-')
-        logger.info(f'Generated delta_data_summary.csv with {len(delta_df)} rows')
+        delta_df.to_csv(self.out_dir / 'delta_dataset_summary.csv', na_rep='-')
+        logger.info(f'Generated delta_dataset_summary.csv with {len(delta_df)} rows')
 
     def _add_rank_metadata(
         self,
