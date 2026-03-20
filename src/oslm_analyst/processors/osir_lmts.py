@@ -776,6 +776,56 @@ class OsirLmtsProcessor:
             eval_rank.to_csv(self.out_dir / 'eval_rank.csv')
             overall_rank.to_csv(self.out_dir / 'overall_rank.csv')
 
+    def gen_rank_for_country(
+        self,
+        strategy: OsirLmtsRankStrategy,
+        model_table: ModelSummaryTable,
+        dataset_table: DatasetSummaryTable,
+        infra_table: InfraSummaryTable,
+        eval_table: EvalSummaryTable,
+        country: str = 'CN',
+        acc: bool = False,
+    ) -> None:
+        target_orgs = {org_info.org for org_info in self._org_list if org_info.country == country}
+
+        filtered_model_table = ModelSummaryTable()
+        for row in model_table.rows:
+            if row.org in target_orgs:
+                filtered_model_table.rows.append(row)
+
+        filtered_dataset_table = DatasetSummaryTable()
+        for row in dataset_table.rows:
+            if row.org in target_orgs:
+                filtered_dataset_table.rows.append(row)
+
+        filtered_infra_table = InfraSummaryTable()
+        for row in infra_table.rows:
+            if row.org in target_orgs:
+                filtered_infra_table.rows.append(row)
+
+        filtered_eval_table = EvalSummaryTable()
+        for row in eval_table.rows:
+            if row.org in target_orgs:
+                filtered_eval_table.rows.append(row)
+
+        model_rank = strategy.rank_model_dim(filtered_model_table)
+        dataset_rank = strategy.rank_dataset_dim(filtered_dataset_table)
+        infra_rank = strategy.rank_infra_dim(filtered_infra_table)
+        eval_rank = strategy.rank_eval_dim(filtered_eval_table)
+        overall_rank = strategy.rank_overall(model_rank, dataset_rank, infra_rank, eval_rank)
+        if acc:
+            last_month_overall_rank_df = self._load_prev_month_summary(
+                f'{country}_acc_overall_rank.csv'
+            )
+            overall_rank = self._add_rank_metadata(overall_rank, last_month_overall_rank_df)
+            overall_rank.to_csv(self.out_dir / f'{country}_acc_overall_rank.csv')
+        else:
+            last_month_overall_rank_df = self._load_prev_month_summary(
+                f'{country}_overall_rank.csv'
+            )
+            overall_rank = self._add_rank_metadata(overall_rank, last_month_overall_rank_df)
+            overall_rank.to_csv(self.out_dir / f'{country}_overall_rank.csv')
+
     def run(
         self,
         strategy: OsirLmtsRankStrategy | None = None,
@@ -810,5 +860,12 @@ class OsirLmtsProcessor:
         # Generate rankings
         self.gen_rank(strategy, model_table, dataset_table, infra_table, eval_table)
         self.gen_rank(strategy, acc_model_table, acc_dataset_table, infra_table, eval_table, True)
+
+        self.gen_rank_for_country(
+            strategy, model_table, dataset_table, infra_table, eval_table, 'CN'
+        )
+        self.gen_rank_for_country(
+            strategy, acc_model_table, acc_dataset_table, infra_table, eval_table, 'CN', True
+        )
 
         logger.info(f'OSIR-LMTS pipeline complete. Output in {self.out_dir}')
