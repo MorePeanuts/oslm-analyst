@@ -1,5 +1,6 @@
 import re
 from oslm_analyst.processors.modality import ModalityAIHelper
+from oslm_analyst.processors.osir_lmts import OsirLmtsProcessor, DefaultRankStrategy
 import typer
 from typer import Argument, Option
 from typing import Annotated, Literal
@@ -239,9 +240,63 @@ def process_modality(
 
 
 @process_app.command('osir-lmts')
-def process_osir_lmts():
-    """ """
-    pass
+def process_osir_lmts(
+    target_month: Annotated[
+        str | None,
+        Argument(
+            help='The target month in YYYY-MM format (e.g., 2026-03). If not provided, uses the previous month.'
+        ),
+    ] = None,
+    output_root: Annotated[
+        str,
+        Option(help='Root directory containing the crawled output data.'),
+    ] = './output',
+    config_root: Annotated[
+        str,
+        Option(
+            help='Root directory containing configuration files (orgs.yaml, model_info.jsonl, etc.).'
+        ),
+    ] = './config',
+    infra_source_path: Annotated[
+        str | None,
+        Option(help='Path to the manually curated infra_summary.csv file to copy.'),
+    ] = None,
+    eval_source_path: Annotated[
+        str | None,
+        Option(help='Path to the manually curated eval_summary.csv file to copy.'),
+    ] = None,
+):
+    """
+    Generate OSIR-LMTS (Open Source AI Resource - Large Model Tracking System) aggregated data.
+
+    This command aggregates data from multiple platforms (HuggingFace, ModelScope, BAAI DataHub)
+    for a given month, generates monthly delta and accumulated statistics, summary CSVs by
+    organization/modality/lifecycle, and rankings using a configurable weighting strategy.
+
+    Output files:
+    - model_data.jsonl / dataset_data.jsonl: Monthly delta data
+    - acc_model_data.jsonl / acc_dataset_data.jsonl: Accumulated data since first month
+    - model_summary.csv / data_summary.csv: Summary by org/modality(/lifecycle) for current month
+    - acc_model_summary.csv / acc_data_summary.csv: Summary for accumulated data
+    - delta_model_summary.csv / delta_data_summary.csv: Delta summary (no ranking)
+    - infra_summary.csv: Copied from the provided source path (manually curated)
+    - eval_summary.csv: Copied from the provided source path (manually curated)
+    - model_rank.csv / dataset_rank.csv / infra_rank.csv / eval_rank.csv / overall_rank.csv: Rankings for current month
+    - acc_model_rank.csv / acc_dataset_rank.csv / acc_overall_rank.csv: Rankings for accumulated data
+    """
+    strategy = DefaultRankStrategy()
+
+    processor = OsirLmtsProcessor(
+        output_root=Path(output_root),
+        config_root=Path(config_root),
+        target_month=target_month,
+    )
+
+    processor.run(
+        strategy=strategy,
+        infra_source_path=Path(infra_source_path) if infra_source_path else None,
+        eval_source_path=Path(eval_source_path) if eval_source_path else None,
+    )
 
 
 @app.command()
