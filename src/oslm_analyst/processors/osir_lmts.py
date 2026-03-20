@@ -529,8 +529,7 @@ class OsirLmtsProcessor:
         for org_info in self._org_list:
             org = org_info.org
             if org not in org_data:
-                row = ModelSummaryRow(org=org)
-                rows.append(row)
+                logger.warning(f'{org} not found in data, while found in config.')
             else:
                 row = ModelSummaryRow(org=org, **org_data[org])
                 rows.append(row)
@@ -605,8 +604,7 @@ class OsirLmtsProcessor:
         for org_info in self._org_list:
             org = org_info.org
             if org not in org_data:
-                row = DatasetSummaryRow(org=org)
-                rows.append(row)
+                logger.warning(f'{org} not found in data, while found in config.')
             else:
                 row = DatasetSummaryRow(org=org, **org_data[org])
                 rows.append(row)
