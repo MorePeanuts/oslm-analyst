@@ -627,6 +627,10 @@ class OsirLmtsProcessor:
     ) -> InfraSummaryTable:
         """Process and copy infra_summary.csv from source path."""
         if infra_source_path is None:
+            infra_source_path = self.out_dir / 'infra_summary.csv'
+            if infra_source_path.exists():
+                logger.debug(f'Infra source file found in {infra_source_path}')
+                return InfraSummaryTable.from_csv(infra_source_path, raw_csv=False)
             infra_source_path = Path(__file__).parents[3] / 'infra_summary.csv'
 
         if not infra_source_path.exists():
@@ -649,6 +653,10 @@ class OsirLmtsProcessor:
     ) -> EvalSummaryTable:
         """Process and copy eval_summary.csv from source path."""
         if eval_source_path is None:
+            eval_source_path = self.out_dir / 'eval_summary.csv'
+            if eval_source_path.exists():
+                logger.debug(f'Eval source file found in {eval_source_path}')
+                return EvalSummaryTable.from_csv(eval_source_path, raw_csv=False)
             eval_source_path = Path(__file__).parents[3] / 'eval_summary.csv'
 
         if not eval_source_path.exists():
