@@ -532,7 +532,7 @@ class OsirLmtsProcessor:
             org = org_info.org
             if self.target_orgs and org not in self.target_orgs:
                 logger.debug(f'{org} is not in target orgs. skipping.')
-            if org not in org_data:
+            elif org not in org_data:
                 logger.warning(f'{org} not found in data, while found in config.')
             else:
                 row = ModelSummaryRow(org=org, **org_data[org])
@@ -609,7 +609,7 @@ class OsirLmtsProcessor:
             org = org_info.org
             if self.target_orgs and org not in self.target_orgs:
                 logger.debug(f'{org} is not in target orgs. skipping.')
-            if org not in org_data:
+            elif org not in org_data:
                 logger.warning(f'{org} not found in data, while found in config.')
             else:
                 row = DatasetSummaryRow(org=org, **org_data[org])
