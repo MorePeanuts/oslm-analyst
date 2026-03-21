@@ -1,5 +1,6 @@
 """OSIR-LMTS data aggregation and processing pipeline."""
 
+from datetime import datetime, timedelta
 from typing import Literal
 
 import csv
@@ -7,7 +8,6 @@ import json
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timedelta
 from pathlib import Path
 
 import jsonlines
@@ -38,22 +38,15 @@ from .osir_lmts_rank import (
 class OsirLmtsProcessor:
     def __init__(
         self,
+        target_month: str,
+        target_orgs: list[str] | None = None,
         output_root: Path = Path('./output'),
         config_root: Path = Path('./config'),
-        target_month: str | None = None,
-        target_orgs: list[str] | None = None,
     ):
         self.output_root = Path(output_root)
         self.config_root = Path(config_root)
 
-        if target_month is None:
-            today = datetime.today()
-            first_day = today.replace(day=1)
-            last_month = first_day - timedelta(days=1)
-            self.target_month = last_month.strftime('%Y-%m')
-        else:
-            self.target_month = target_month
-
+        self.target_month = target_month
         self.target_orgs = target_orgs
         self.target_date = datetime.strptime(self.target_month, '%Y-%m')
         self.year = self.target_date.year
@@ -746,11 +739,13 @@ class OsirLmtsProcessor:
         acc: bool = False,
     ) -> None:
         """Generate rankings using the given strategy."""
-        model_rank = strategy.rank_model_dim(model_table)
-        dataset_rank = strategy.rank_dataset_dim(dataset_table)
-        infra_rank = strategy.rank_infra_dim(infra_table)
-        eval_rank = strategy.rank_eval_dim(eval_table)
-        overall_rank = strategy.rank_overall(model_rank, dataset_rank, infra_rank, eval_rank)
+        model_rank = strategy.rank_model_dim(model_table, acc=acc)
+        dataset_rank = strategy.rank_dataset_dim(dataset_table, acc=acc)
+        infra_rank = strategy.rank_infra_dim(infra_table, acc=acc)
+        eval_rank = strategy.rank_eval_dim(eval_table, acc=acc)
+        overall_rank = strategy.rank_overall(
+            model_rank, dataset_rank, infra_rank, eval_rank, acc=acc
+        )
         if acc:
             last_month_model_rank_df = self._load_prev_month_summary('acc_model_rank.csv')
             last_month_dataset_rank_df = self._load_prev_month_summary('acc_dataset_rank.csv')
@@ -814,11 +809,13 @@ class OsirLmtsProcessor:
             if row.org in target_orgs:
                 filtered_eval_table.rows.append(row)
 
-        model_rank = strategy.rank_model_dim(filtered_model_table)
-        dataset_rank = strategy.rank_dataset_dim(filtered_dataset_table)
-        infra_rank = strategy.rank_infra_dim(filtered_infra_table)
-        eval_rank = strategy.rank_eval_dim(filtered_eval_table)
-        overall_rank = strategy.rank_overall(model_rank, dataset_rank, infra_rank, eval_rank)
+        model_rank = strategy.rank_model_dim(filtered_model_table, acc=acc)
+        dataset_rank = strategy.rank_dataset_dim(filtered_dataset_table, acc=acc)
+        infra_rank = strategy.rank_infra_dim(filtered_infra_table, acc=acc)
+        eval_rank = strategy.rank_eval_dim(filtered_eval_table, acc=acc)
+        overall_rank = strategy.rank_overall(
+            model_rank, dataset_rank, infra_rank, eval_rank, acc=acc
+        )
         if acc:
             last_month_overall_rank_df = self._load_prev_month_summary(
                 f'{country}_acc_overall_rank.csv'

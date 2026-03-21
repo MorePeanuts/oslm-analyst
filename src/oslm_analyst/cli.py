@@ -1,11 +1,12 @@
+from datetime import datetime, timedelta
 import json
 import re
 from oslm_analyst.processors.modality import ModalityAIHelper
-from oslm_analyst.processors.osir_lmts import OsirLmtsProcessor, DefaultRankStrategy
+from oslm_analyst.processors.osir_lmts import OsirLmtsProcessor
+from oslm_analyst.processors.osir_lmts_rank import get_rank_strategy_for_month
 import typer
 from typer import Argument, Option
 from typing import Annotated, Literal
-from datetime import datetime
 from loguru import logger
 from pathlib import Path
 from pprint import pformat
@@ -303,7 +304,16 @@ def process_osir_lmts(
     - model_rank.csv / dataset_rank.csv / infra_rank.csv / eval_rank.csv / overall_rank.csv: Rankings for current month
     - acc_model_rank.csv / acc_dataset_rank.csv / acc_overall_rank.csv: Rankings for accumulated data
     """
-    strategy = DefaultRankStrategy()
+    # Resolve target_month: if None, use previous month
+    if target_month is None:
+        today = datetime.today()
+        first_day = today.replace(day=1)
+        last_month = first_day - timedelta(days=1)
+        resolved_target_month = last_month.strftime('%Y-%m')
+    else:
+        resolved_target_month = target_month
+
+    strategy = get_rank_strategy_for_month(resolved_target_month)
 
     if target_orgs_path:
         if Path(target_orgs_path).exists():
@@ -316,10 +326,10 @@ def process_osir_lmts(
         target_orgs = None
 
     processor = OsirLmtsProcessor(
+        target_month=resolved_target_month,
+        target_orgs=target_orgs,
         output_root=Path(output_root),
         config_root=Path(config_root),
-        target_month=target_month,
-        target_orgs=target_orgs,
     )
 
     processor.run(
