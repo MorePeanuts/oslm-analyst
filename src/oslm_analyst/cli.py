@@ -260,11 +260,23 @@ def process_osir_lmts(
     ] = './config',
     infra_source_path: Annotated[
         str | None,
-        Option(help='Path to the manually curated infra_summary.csv file to copy.'),
+        Option(
+            help='Path to the manually curated infra_summary.csv file. '
+            'If not provided (None), will try to load from: '
+            '1) output/osir-lmts_{YYYY-MM}/infra_summary.csv (if exists), '
+            '2) project root/infra_summary.csv. '
+            'If neither exists, will raise an error.'
+        ),
     ] = None,
     eval_source_path: Annotated[
         str | None,
-        Option(help='Path to the manually curated eval_summary.csv file to copy.'),
+        Option(
+            help='Path to the manually curated eval_summary.csv file. '
+            'If not provided (None), will try to load from: '
+            '1) output/osir-lmts_{YYYY-MM}/eval_summary.csv (if exists), '
+            '2) project root/eval_summary.csv. '
+            'If neither exists, will raise an error.'
+        ),
     ] = None,
     target_orgs_path: Annotated[
         str | None,
