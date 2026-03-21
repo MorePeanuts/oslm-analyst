@@ -1,3 +1,4 @@
+import json
 import re
 from oslm_analyst.processors.modality import ModalityAIHelper
 from oslm_analyst.processors.osir_lmts import OsirLmtsProcessor, DefaultRankStrategy
@@ -265,6 +266,10 @@ def process_osir_lmts(
         str | None,
         Option(help='Path to the manually curated eval_summary.csv file to copy.'),
     ] = None,
+    target_orgs_path: Annotated[
+        str | None,
+        Option(help=''),
+    ] = './config/osir_lmts_orgs.json',
 ):
     """
     Generate OSIR-LMTS (Open Source AI Resource - Large Model Tracking System) aggregated data.
@@ -286,10 +291,21 @@ def process_osir_lmts(
     """
     strategy = DefaultRankStrategy()
 
+    if target_orgs_path:
+        if Path(target_orgs_path).exists():
+            with Path(target_orgs_path).open() as f:
+                target_orgs = json.load(f)
+        else:
+            target_orgs = None
+            logger.warning(f'{target_orgs_path} does not exist.')
+    else:
+        target_orgs = None
+
     processor = OsirLmtsProcessor(
         output_root=Path(output_root),
         config_root=Path(config_root),
         target_month=target_month,
+        target_orgs=target_orgs,
     )
 
     processor.run(

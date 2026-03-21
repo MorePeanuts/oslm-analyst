@@ -58,10 +58,13 @@ class OsirLmtsRankStrategy(ABC):
         infra_df = infra_table.to_dataframe()
         eval_df = eval_table.to_dataframe()
 
-        assert set(model_table.get_orgs()) == set(dataset_table.get_orgs())
-        assert set(dataset_table.get_orgs()) == set(infra_table.get_orgs())
-        assert set(infra_table.get_orgs()) == set(eval_table.get_orgs())
-        orgs = model_table.get_orgs()
+        # TODO: orgs used
+        orgs = list(
+            set(model_table.get_orgs())
+            | set(dataset_table.get_orgs())
+            | set(infra_table.get_orgs())
+            | set(eval_table.get_orgs())
+        )
 
         df = pd.DataFrame(index=orgs)  # type: ignore
         df['model_influence'] = 1 / np.log2(model_df['rank'] + 1)

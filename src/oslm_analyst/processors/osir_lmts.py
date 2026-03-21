@@ -41,6 +41,7 @@ class OsirLmtsProcessor:
         output_root: Path = Path('./output'),
         config_root: Path = Path('./config'),
         target_month: str | None = None,
+        target_orgs: list[str] | None = None,
     ):
         self.output_root = Path(output_root)
         self.config_root = Path(config_root)
@@ -53,6 +54,7 @@ class OsirLmtsProcessor:
         else:
             self.target_month = target_month
 
+        self.target_orgs = target_orgs
         self.target_date = datetime.strptime(self.target_month, '%Y-%m')
         self.year = self.target_date.year
         self.month = self.target_date.month
@@ -528,6 +530,8 @@ class OsirLmtsProcessor:
         rows = []
         for org_info in self._org_list:
             org = org_info.org
+            if self.target_orgs and org not in self.target_orgs:
+                logger.debug(f'{org} is not in target orgs. skipping.')
             if org not in org_data:
                 logger.warning(f'{org} not found in data, while found in config.')
             else:
@@ -603,6 +607,8 @@ class OsirLmtsProcessor:
         rows = []
         for org_info in self._org_list:
             org = org_info.org
+            if self.target_orgs and org not in self.target_orgs:
+                logger.debug(f'{org} is not in target orgs. skipping.')
             if org not in org_data:
                 logger.warning(f'{org} not found in data, while found in config.')
             else:
@@ -845,6 +851,7 @@ class OsirLmtsProcessor:
         acc_dataset_infos = self.gen_acc_dataset_data(dataset_infos)
 
         # Generate summary tables
+        # TODO: orgs
         model_table = self.summary_model_data(model_infos)
         dataset_table = self.summary_dataset_data(dataset_infos)
 
