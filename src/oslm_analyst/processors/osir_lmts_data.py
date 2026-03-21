@@ -353,10 +353,47 @@ class BaseSummaryTable[RowType](ABC):
         """Get the row class."""
         pass
 
-    def to_dataframe(self) -> pd.DataFrame:
-        """Convert to pandas DataFrame."""
+    def to_dataframe(self, others_as_float: bool = True) -> pd.DataFrame:
+        """Convert to pandas DataFrame.
+
+        Args:
+            others_as_float: If True, fields other than org, score, rank, delta_rank,
+                last_month_rank will be cast to float. Otherwise, they will be
+                cast to integer.
+
+        Fixed type rules:
+            - org: string (index)
+            - score: float
+            - rank, delta_rank, last_month_rank: int (nullable)
+        """
+        # Fields that must be int type
+        fixed_int_fields = {'rank', 'delta_rank', 'last_month_rank'}
+        # Fields that must be float type
+        fixed_float_fields = {'score'}
+
         data = [row.to_dict() for row in self.rows]  # type: ignore
-        return pd.DataFrame(data).set_index('org')
+        df = pd.DataFrame(data).set_index('org')
+
+        # Ensure org is string (handled by set_index)
+        # Cast fixed int fields
+        for k in fixed_int_fields:
+            if k in df.columns:
+                df[k] = df[k].astype('Int64')  # Nullable integer type
+
+        # Cast fixed float fields
+        for k in fixed_float_fields:
+            if k in df.columns:
+                df[k] = df[k].astype(float)
+
+        # Cast other fields based on others_as_float parameter
+        for k in df.columns:
+            if k not in fixed_int_fields and k not in fixed_float_fields:
+                if others_as_float:
+                    df[k] = df[k].astype(float)
+                else:
+                    df[k] = df[k].astype('Int64')
+
+        return df
 
     @classmethod
     def from_dataframe(cls, df: pd.DataFrame):
@@ -372,9 +409,9 @@ class BaseSummaryTable[RowType](ABC):
         df = pd.read_csv(file_path, index_col='org')
         return cls.from_dataframe(df)
 
-    def to_csv(self, file_path: Path) -> None:
+    def to_csv(self, file_path: Path, others_as_float: bool = True) -> None:
         """Write to CSV file."""
-        df = self.to_dataframe()
+        df = self.to_dataframe(others_as_float)
         df.to_csv(file_path)
 
     def get_orgs(self) -> list[str]:

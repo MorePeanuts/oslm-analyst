@@ -542,7 +542,7 @@ class OsirLmtsProcessor:
 
         if write_csv:
             filename = f'{prefix}model_summary.csv' if prefix else 'model_summary.csv'
-            table.to_csv(self.out_dir / filename)
+            table.to_csv(self.out_dir / filename, others_as_float=False)
             logger.info(f'Generated {filename} with {len(rows)} rows')
 
         return table
@@ -619,7 +619,7 @@ class OsirLmtsProcessor:
 
         if write_csv:
             filename = f'{prefix}dataset_summary.csv' if prefix else 'dataset_summary.csv'
-            table.to_csv(self.out_dir / filename)
+            table.to_csv(self.out_dir / filename, others_as_float=False)
             logger.info(f'Generated {filename} with {len(rows)} rows')
 
         return table
@@ -644,7 +644,7 @@ class OsirLmtsProcessor:
         table = InfraSummaryTable.from_csv(infra_source_path, raw_csv=True)
 
         if write_csv:
-            table.to_csv(self.out_dir / 'infra_summary.csv')
+            table.to_csv(self.out_dir / 'infra_summary.csv', others_as_float=False)
             logger.info(f'Processed infra_summary.csv from {infra_source_path}')
             infra_source_path.unlink(missing_ok=True)
 
@@ -670,7 +670,7 @@ class OsirLmtsProcessor:
         table = EvalSummaryTable.from_csv(eval_source_path, raw_csv=True)
 
         if write_csv:
-            table.to_csv(self.out_dir / 'eval_summary.csv')
+            table.to_csv(self.out_dir / 'eval_summary.csv', others_as_float=False)
             logger.info(f'Processed eval_summary.csv from {eval_source_path}')
             eval_source_path.unlink(missing_ok=True)
 
@@ -694,7 +694,7 @@ class OsirLmtsProcessor:
 
     def delta_model_data(self, model_table: ModelSummaryTable) -> None:
         """Generate delta summary (current month - previous month)."""
-        curr_df = model_table.to_dataframe()
+        curr_df = model_table.to_dataframe(others_as_float=False)
         prev_df = self._load_prev_month_summary('model_summary.csv')
         if prev_df is None:
             delta_df = pd.DataFrame(index=curr_df.index, columns=curr_df.columns)
@@ -707,7 +707,7 @@ class OsirLmtsProcessor:
 
     def delta_dataset_data(self, dataset_table: DatasetSummaryTable) -> None:
         """Generate delta summary (current month - previous month)."""
-        curr_df = dataset_table.to_dataframe()
+        curr_df = dataset_table.to_dataframe(others_as_float=False)
         prev_df = self._load_prev_month_summary('dataset_summary.csv')
         if prev_df is None:
             delta_df = pd.DataFrame(index=curr_df.index, columns=curr_df.columns)
@@ -851,7 +851,6 @@ class OsirLmtsProcessor:
         acc_dataset_infos = self.gen_acc_dataset_data(dataset_infos)
 
         # Generate summary tables
-        # TODO: orgs
         model_table = self.summary_model_data(model_infos)
         dataset_table = self.summary_dataset_data(dataset_infos)
 
