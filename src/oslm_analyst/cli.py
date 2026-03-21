@@ -268,7 +268,9 @@ def process_osir_lmts(
     ] = None,
     target_orgs_path: Annotated[
         str | None,
-        Option(help=''),
+        Option(
+            help='Specify the path to the JSON file containing the list of institutions to be included in the ranking.'
+        ),
     ] = './config/osir_lmts_orgs.json',
 ):
     """
