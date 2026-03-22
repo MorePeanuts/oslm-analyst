@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 import json
 import re
+import subprocess
+import sys
 from oslm_analyst.processors.modality import ModalityAIHelper
 from oslm_analyst.processors.osir_lmts import OsirLmtsProcessor
 from oslm_analyst.processors.osir_lmts_rank import get_rank_strategy_for_month
@@ -337,6 +339,52 @@ def process_osir_lmts(
         infra_source_path=Path(infra_source_path) if infra_source_path else None,
         eval_source_path=Path(eval_source_path) if eval_source_path else None,
     )
+
+
+@app.command()
+def dashboard(
+    port: Annotated[
+        int,
+        Option(help="Port to run the Streamlit dashboard on."),
+    ] = 8501,
+    host: Annotated[
+        str,
+        Option(help="Host to run the Streamlit dashboard on."),
+    ] = "localhost",
+):
+    """
+    Launch the Streamlit dashboard for data visualization.
+    """
+    dashboard_path = Path(__file__).parent / "ui" / "dashboard.py"
+
+    if not dashboard_path.exists():
+        logger.error(f"Dashboard file not found: {dashboard_path}")
+        raise typer.Exit(1)
+
+    cmd = [
+        sys.executable,
+        "-m",
+        "streamlit",
+        "run",
+        str(dashboard_path),
+        "--server.port",
+        str(port),
+        "--server.address",
+        host,
+        "--server.headless",
+        "true",
+    ]
+
+    logger.info(f"Launching dashboard at http://{host}:{port}")
+    logger.info(f"Running command: {' '.join(cmd)}")
+
+    try:
+        subprocess.run(cmd, check=True)
+    except KeyboardInterrupt:
+        logger.info("Dashboard stopped by user")
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Dashboard failed with error: {e}")
+        raise typer.Exit(1)
 
 
 @app.command()
