@@ -46,7 +46,7 @@ def render_overall_rank(df: pd.DataFrame | None, title: str = 'Overall Ranking')
 
     st.dataframe(
         display_df.sort_values('rank'),
-        use_container_width=True,
+        width='stretch',
     )
 
 
@@ -60,7 +60,7 @@ def render_summary_table(df: pd.DataFrame | None, title: str):
     if 'org' in df.columns:
         df = df.set_index('org')
 
-    st.dataframe(df, use_container_width=True)
+    st.dataframe(df, width='stretch')
 
 
 def render_trend_chart(all_data: dict[str, pd.DataFrame], metric: str, org: str | None = None):
@@ -272,4 +272,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
