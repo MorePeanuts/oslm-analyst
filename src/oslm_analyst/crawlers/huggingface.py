@@ -5,6 +5,7 @@ from collections.abc import Iterator
 from dataclasses import asdict, dataclass, field
 from typing import Literal
 
+import httpx
 from huggingface_hub import DatasetCard, HfApi, ModelCard
 from huggingface_hub.errors import HfHubHTTPError
 from huggingface_hub.hf_api import DatasetInfo, ModelInfo
@@ -22,8 +23,18 @@ from ..utils import today
 from .crawl_utils import str2int
 
 
-def _is_rate_limit_error(exception):
-    return isinstance(exception, HfHubHTTPError) and exception.response.status_code == 429
+def _is_retryable_error(exception):
+    # Retry on rate limit errors (429)
+    if isinstance(exception, HfHubHTTPError) and exception.response.status_code == 429:
+        return True
+    # Retry on network connection errors
+    if isinstance(exception, (httpx.ConnectError, httpx.ReadTimeout, httpx.WriteTimeout)):
+        return True
+    # Retry on connection reset errors (often wrapped in other exceptions)
+    exc_str = str(exception)
+    if 'Connection reset by peer' in exc_str or 'ECONNRESET' in exc_str:
+        return True
+    return False
 
 
 def hf_wait_logic(retry_state):
@@ -40,6 +51,10 @@ def hf_wait_logic(retry_state):
         if match:
             return float(match.group(1))
 
+    # For network errors, use a shorter wait time with some jitter
+    if isinstance(exc, (httpx.ConnectError, httpx.ReadTimeout, httpx.WriteTimeout)):
+        return 30.0
+
     return 60.0
 
 
@@ -52,7 +67,7 @@ class HfCrawler:
         # reraise=False: raise RetryError when max retry exceeded
         self.retrier = Retrying(
             reraise=False,
-            retry=retry_if_exception(_is_rate_limit_error),
+            retry=retry_if_exception(_is_retryable_error),
             wait=hf_wait_logic,
             stop=stop_after_attempt(max_retry),
         )
@@ -182,6 +197,12 @@ class HfCrawler:
                 f'Max retry exceeded when fetch discussions from {identifier}, stopping iteration'
             )
             return total_count, total_msg
+        except HfHubHTTPError as e:
+            if e.response.status_code == 403 and 'Discussions are disabled for this repo' in str(e):
+                # Discussions are disabled for this repo, this is expected, not an error
+                return total_count, total_msg
+            logger.exception(f'Exception when fetch discussions from {identifier}')
+            return total_count, total_msg
         except Exception:
             logger.exception(f'Exception when fetch discussions from {identifier}')
             return total_count, total_msg
@@ -209,7 +230,10 @@ class HfCrawler:
                 )
                 return total_count, total_msg
             except HfHubHTTPError as e:
-                if e.response.status_code == 403 and 'Discussions are disabled for this repo' in str(e):
+                if (
+                    e.response.status_code == 403
+                    and 'Discussions are disabled for this repo' in str(e)
+                ):
                     # Discussions are disabled for this repo, this is expected, not an error
                     return total_count, total_msg
                 logger.exception(f'Exception when fetch discussion from {identifier}')
