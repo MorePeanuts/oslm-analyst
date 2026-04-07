@@ -208,6 +208,12 @@ class HfCrawler:
                     f'Max retry exceeded when fetch discussions from {identifier}, stopping iteration'
                 )
                 return total_count, total_msg
+            except HfHubHTTPError as e:
+                if e.response.status_code == 403 and 'Discussions are disabled for this repo' in str(e):
+                    # Discussions are disabled for this repo, this is expected, not an error
+                    return total_count, total_msg
+                logger.exception(f'Exception when fetch discussion from {identifier}')
+                return total_count, total_msg
             except Exception:
                 logger.exception(f'Exception when fetch discussion from {identifier}')
                 return total_count, total_msg
