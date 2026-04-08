@@ -26,17 +26,21 @@ class Lifecycle(str, Enum):
 class ModelExtraInfo:
     repo: str
     name: str
-    modality: Modality
-    valid: bool
+    modality: Modality | None
+    valid: bool | None
     link: str
 
     @classmethod
     def from_dict(cls, obj: dict) -> 'ModelExtraInfo':
-        return cls(obj['repo'], obj['name'], obj['modality'], obj['valid'], obj['link'])
+        modality = Modality(obj['modality']) if obj.get('modality') else None
+        valid = obj['valid'] if 'valid' in obj else None
+        return cls(obj['repo'], obj['name'], modality, valid, obj['link'])
 
     @classmethod
     def from_dataclass(cls, obj) -> 'ModelExtraInfo':
-        return cls(obj.repo, obj.name, obj.modality, obj.valid, obj.link)
+        # For new models from crawler, modality and valid are None initially
+        # They will be filled later by process gen-modality
+        return cls(obj.repo, obj.name, None, None, obj.link)
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -46,20 +50,25 @@ class ModelExtraInfo:
 class DatasetExtraInfo:
     repo: str
     name: str
-    modality: Modality
-    lifecycle: Lifecycle
-    valid: bool
+    modality: Modality | None
+    lifecycle: Lifecycle | None
+    valid: bool | None
     link: str
 
     @classmethod
     def from_dict(cls, obj: dict) -> 'DatasetExtraInfo':
+        modality = Modality(obj['modality']) if obj.get('modality') else None
+        lifecycle = Lifecycle(obj['lifecycle']) if obj.get('lifecycle') else None
+        valid = obj['valid'] if 'valid' in obj else None
         return cls(
-            obj['repo'], obj['name'], obj['modality'], obj['lifecycle'], obj['valid'], obj['link']
+            obj['repo'], obj['name'], modality, lifecycle, valid, obj['link']
         )
 
     @classmethod
     def from_dataclass(cls, obj) -> 'DatasetExtraInfo':
-        return cls(obj.repo, obj.name, obj.modality, obj.lifecycle, obj.valid, obj.link)
+        # For new datasets from crawler, modality, lifecycle and valid are None initially
+        # They will be filled later by process gen-modality
+        return cls(obj.repo, obj.name, None, None, None, obj.link)
 
     def to_dict(self) -> dict:
         return asdict(self)

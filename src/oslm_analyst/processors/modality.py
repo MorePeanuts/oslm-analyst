@@ -151,11 +151,13 @@ class ModalityAIHelper:
                 ):
                     for line in reader:
                         identifier = format_identifier_from_dict(line)
-                        # Skip if already has valid and modality filled
-                        if not line.get('valid') or (
-                            line.get('valid') is not None and line.get('modality') is not None
-                        ):
-                            logger.trace(f'Skipping model {identifier} - already classified')
+                        # Skip if:
+                        # 1. valid is False (already marked invalid), OR
+                        # 2. valid is True AND modality is not None (already classified)
+                        valid_val = line.get('valid')
+                        has_modality = line.get('modality') is not None
+                        if valid_val is False or (valid_val is True and has_modality):
+                            logger.trace(f'Skipping model {identifier} - already classified or invalid')
                             writer.write(line)
                             continue
                         # Need to classify
@@ -186,13 +188,14 @@ class ModalityAIHelper:
                 ):
                     for line in reader:
                         identifier = format_identifier_from_dict(line)
-                        # Skip if already has valid, modality and lifecycle filled
-                        if not line.get('valid') or (
-                            line.get('valid') is not None
-                            and line.get('modality') is not None
-                            and line.get('lifecycle') is not None
-                        ):
-                            logger.trace(f'Skipping dataset {identifier} - already classified')
+                        # Skip if:
+                        # 1. valid is False (already marked invalid), OR
+                        # 2. valid is True AND modality is not None AND lifecycle is not None (already classified)
+                        valid_val = line.get('valid')
+                        has_modality = line.get('modality') is not None
+                        has_lifecycle = line.get('lifecycle') is not None
+                        if valid_val is False or (valid_val is True and has_modality and has_lifecycle):
+                            logger.trace(f'Skipping dataset {identifier} - already classified or invalid')
                             writer.write(line)
                             continue
                         # Need to classify
