@@ -13,6 +13,7 @@ dependencies = [
   "langchain>=1.2.12",
   "langchain-openai>=1.1.11",
   "loguru>=0.7.3",
+  "mcp>=1.0.0",
   "modelscope>=1.33.0",
   "pandas>=2.3.3",
   "pytest>=8.4.2",

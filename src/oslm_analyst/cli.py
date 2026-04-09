@@ -3,6 +3,7 @@ import json
 import re
 import subprocess
 import sys
+import asyncio
 from oslm_analyst.processors.modality import ModalityAIHelper
 from oslm_analyst.processors.osir_lmts import OsirLmtsProcessor
 from oslm_analyst.processors.osir_lmts_rank import get_rank_strategy_for_month
@@ -14,6 +15,7 @@ from loguru import logger
 from pathlib import Path
 from pprint import pformat
 from .utils import today, parse_commas_separated_params, OrgInfo, Source
+from . import mcp_server
 from .crawl import (
     run_hf_crawl_pipeline,
     run_ms_crawl_pipeline,
@@ -498,6 +500,23 @@ def list_db(
         model_count = sum(1 for _ in db.get_models(month=month))
         dataset_count = sum(1 for _ in db.get_datasets(month=month))
         logger.info(f'  {month}: {model_count} models, {dataset_count} datasets')
+
+
+@db_app.command('mcp')
+def mcp_server_cmd(
+    db_path: Annotated[
+        str,
+        Option(help='Path to the SQLite database file.'),
+    ] = './output/osir_lmts.db',
+):
+    """
+    Start the OSIR-LMTS Database MCP (Model Context Protocol) server.
+
+    This server provides safe read-only access to the osir_lmts.db database
+    through MCP tools for use with AI assistants.
+    """
+    logger.info(f"Starting OSIR-LMTS MCP server with database: {db_path}")
+    asyncio.run(mcp_server.main(db_path))
 
 
 def main() -> None:

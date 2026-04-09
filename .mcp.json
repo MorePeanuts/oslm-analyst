@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "osir-lmts-db": {
+      "command": "uv",
+      "args": [
+        "run",
+        "oslm-analyst",
+        "db",
+        "mcp"
+      ]
+    }
+  }
+}
