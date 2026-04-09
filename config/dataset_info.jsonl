@@ -4759,7 +4759,7 @@
 {"repo": "tencent-community", "name": "CL-bench", "modality": null, "lifecycle": null, "valid": false, "link": "https://modelscope.cn/datasets/tencent-community/CL-bench"}
 {"repo": "tencent-community", "name": "A.S.E", "modality": null, "lifecycle": null, "valid": false, "link": "https://modelscope.cn/datasets/tencent-community/A.S.E"}
 {"repo": "facebook", "name": "ego-1k", "modality": "Vision", "lifecycle": "Fine-tuning", "valid": true, "link": "https://huggingface.co/datasets/facebook/ego-1k"}
-{"repo": "facebook", "name": "dexwm", "modality": "Embodied", "lifecycle": null, "valid": true, "link": "https://huggingface.co/datasets/facebook/dexwm"}
+{"repo": "facebook", "name": "dexwm", "modality": "Embodied", "lifecycle": "Fine-tuning", "valid": true, "link": "https://huggingface.co/datasets/facebook/dexwm"}
 {"repo": "facebook", "name": "boxer", "modality": null, "lifecycle": null, "valid": false, "link": "https://huggingface.co/datasets/facebook/boxer"}
 {"repo": "RoboCOIN", "name": "Galaxea_R1_Lite_storage_object_yellow_basket", "modality": null, "lifecycle": null, "valid": false, "link": "https://huggingface.co/datasets/RoboCOIN/Galaxea_R1_Lite_storage_object_yellow_basket"}
 {"repo": "RoboCOIN", "name": "Galaxea_R1_Lite_Galaxea_R1_Lite_pour_powder", "modality": null, "lifecycle": null, "valid": false, "link": "https://huggingface.co/datasets/RoboCOIN/Galaxea_R1_Lite_Galaxea_R1_Lite_pour_powder"}
@@ -5019,7 +5019,7 @@
 {"repo": "UKPLab", "name": "Graph2Counsel", "modality": "Language", "lifecycle": "Fine-tuning", "valid": true, "link": "https://huggingface.co/datasets/UKPLab/Graph2Counsel"}
 {"repo": "UKPLab", "name": "MAGneT", "modality": "Language", "lifecycle": "Fine-tuning", "valid": true, "link": "https://huggingface.co/datasets/UKPLab/MAGneT"}
 {"repo": "microsoft", "name": "hnm-search-data", "modality": "Multimodal", "lifecycle": "Fine-tuning", "valid": true, "link": "https://huggingface.co/datasets/microsoft/hnm-search-data"}
-{"repo": "microsoft", "name": "AgentRx", "modality": null, "lifecycle": null, "valid": true, "link": "https://huggingface.co/datasets/microsoft/AgentRx"}
+{"repo": "microsoft", "name": "AgentRx", "modality": "Language", "lifecycle": "Evaluation", "valid": true, "link": "https://huggingface.co/datasets/microsoft/AgentRx"}
 {"repo": "microsoft", "name": "multi-fidelity-training-mlff", "modality": "3D", "lifecycle": "Pre-training", "valid": true, "link": "https://huggingface.co/datasets/microsoft/multi-fidelity-training-mlff"}
 {"repo": "microsoft", "name": "BizGenEval", "modality": "Vision", "lifecycle": "Evaluation", "valid": true, "link": "https://huggingface.co/datasets/microsoft/BizGenEval"}
 {"repo": "microsoft", "name": "AVGen-Bench", "modality": "Multimodal", "lifecycle": "Evaluation", "valid": true, "link": "https://huggingface.co/datasets/microsoft/AVGen-Bench"}
@@ -5051,7 +5051,7 @@
 {"repo": "nvidia", "name": "Nemotron-SFT-Instruction-Following-Chat-v2", "modality": "Language", "lifecycle": "Fine-tuning", "valid": true, "link": "https://huggingface.co/datasets/nvidia/Nemotron-SFT-Instruction-Following-Chat-v2"}
 {"repo": "nvidia", "name": "Nemotron-SpecializedDomains-Finance-v1", "modality": "Language", "lifecycle": "Fine-tuning", "valid": true, "link": "https://huggingface.co/datasets/nvidia/Nemotron-SpecializedDomains-Finance-v1"}
 {"repo": "nvidia", "name": "Nemotron-SFT-SWE-v2", "modality": "Language", "lifecycle": "Fine-tuning", "valid": true, "link": "https://huggingface.co/datasets/nvidia/Nemotron-SFT-SWE-v2"}
-{"repo": "nvidia", "name": "Nemotron-RLHF-GenRM-v1", "modality": null, "lifecycle": "Preference", "valid": true, "link": "https://huggingface.co/datasets/nvidia/Nemotron-RLHF-GenRM-v1"}
+{"repo": "nvidia", "name": "Nemotron-RLHF-GenRM-v1", "modality": "Language", "lifecycle": "Preference", "valid": true, "link": "https://huggingface.co/datasets/nvidia/Nemotron-RLHF-GenRM-v1"}
 {"repo": "nvidia", "name": "Nemotron-RL-ReasoningGym-v1", "modality": "Language", "lifecycle": "Fine-tuning", "valid": true, "link": "https://huggingface.co/datasets/nvidia/Nemotron-RL-ReasoningGym-v1"}
 {"repo": "nvidia", "name": "Nemotron-SFT-Multilingual-v1", "modality": null, "lifecycle": null, "valid": false, "link": "https://huggingface.co/datasets/nvidia/Nemotron-SFT-Multilingual-v1"}
 {"repo": "nvidia", "name": "Nemotron-RL-Safety-v1", "modality": null, "lifecycle": null, "valid": false, "link": "https://huggingface.co/datasets/nvidia/Nemotron-RL-Safety-v1"}
@@ -5074,3 +5074,16 @@
 {"repo": "tencent", "name": "Penguin-Recap-I", "modality": "Multimodal", "lifecycle": "Pre-training", "valid": true, "link": "https://huggingface.co/datasets/tencent/Penguin-Recap-I"}
 {"repo": "tencent", "name": "RVMS-Bench", "modality": "Vision", "lifecycle": "Evaluation", "valid": true, "link": "https://huggingface.co/datasets/tencent/RVMS-Bench"}
 {"repo": "Salesforce", "name": "vibepass", "modality": "Language", "lifecycle": "Evaluation", "valid": true, "link": "https://huggingface.co/datasets/Salesforce/vibepass"}
+{"repo": "RoboCOIN", "name": "Realman_RMC_AIDA_L_pass_bowl", "modality": null, "lifecycle": null, "valid": false, "link": "https://modelscope.cn/datasets/RoboCOIN/Realman_RMC_AIDA_L_pass_bowl"}
+{"repo": "Shanghai_AI_Laboratory", "name": "WildClawBench", "modality": null, "lifecycle": null, "valid": false, "link": "https://modelscope.cn/datasets/Shanghai_AI_Laboratory/WildClawBench"}
+{"repo": "Shanghai_AI_Laboratory", "name": "EndoCoT-Data", "modality": null, "lifecycle": null, "valid": false, "link": "https://modelscope.cn/datasets/Shanghai_AI_Laboratory/EndoCoT-Data"}
+{"repo": "Shanghai_AI_Laboratory", "name": "VC-RewardBench", "modality": null, "lifecycle": null, "valid": false, "link": "https://modelscope.cn/datasets/Shanghai_AI_Laboratory/VC-RewardBench"}
+{"repo": "OpenDataLab", "name": "SA-RxnDiagram-15k", "modality": null, "lifecycle": null, "valid": false, "link": "https://modelscope.cn/datasets/OpenDataLab/SA-RxnDiagram-15k"}
+{"repo": "OpenDataLab", "name": "SA-Prot-annot", "modality": null, "lifecycle": null, "valid": false, "link": "https://modelscope.cn/datasets/OpenDataLab/SA-Prot-annot"}
+{"repo": "OpenDataLab", "name": "WebMainBench", "modality": null, "lifecycle": null, "valid": false, "link": "https://modelscope.cn/datasets/OpenDataLab/WebMainBench"}
+{"repo": "OpenDataLab", "name": "U-RxnDiagram-15k", "modality": null, "lifecycle": null, "valid": false, "link": "https://modelscope.cn/datasets/OpenDataLab/U-RxnDiagram-15k"}
+{"repo": "ZhipuAI", "name": "ZClawBench", "modality": null, "lifecycle": null, "valid": false, "link": "https://modelscope.cn/datasets/ZhipuAI/ZClawBench"}
+{"repo": "ZhipuAI", "name": "Vision2Web", "modality": null, "lifecycle": null, "valid": false, "link": "https://modelscope.cn/datasets/ZhipuAI/Vision2Web"}
+{"repo": "tencent-community", "name": "RVMS-Bench", "modality": null, "lifecycle": null, "valid": false, "link": "https://modelscope.cn/datasets/tencent-community/RVMS-Bench"}
+{"repo": "tencent-community", "name": "Penguin-Recap-I", "modality": null, "lifecycle": null, "valid": false, "link": "https://modelscope.cn/datasets/tencent-community/Penguin-Recap-I"}
+{"repo": "tencent-community", "name": "Penguin-Recap-V", "modality": null, "lifecycle": null, "valid": false, "link": "https://modelscope.cn/datasets/tencent-community/Penguin-Recap-V"}
