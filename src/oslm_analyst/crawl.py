@@ -45,10 +45,12 @@ def run_hf_crawl_pipeline(
         with jsonlines.open(model_info_path, 'r') as reader:
             for line in reader:
                 model_info[format_identifier_from_dict(line)] = ModelExtraInfo.from_dict(line)
+            logger.info(f'Total ModelExtraInfo: {len(model_info)}')
     if dataset_info_path.exists():
         with jsonlines.open(dataset_info_path, 'r') as reader:
             for line in reader:
                 dataset_info[format_identifier_from_dict(line)] = DatasetExtraInfo.from_dict(line)
+            logger.info(f'Total DatasetExtraInfo: {len(dataset_info)}')
 
     total_errors = 0
     logger.info('Calculate total records...')
@@ -130,10 +132,12 @@ def run_ms_crawl_pipeline(
         with jsonlines.open(model_info_path, 'r') as reader:
             for line in reader:
                 model_info[format_identifier_from_dict(line)] = ModelExtraInfo.from_dict(line)
+            logger.info(f'Total ModelExtraInfo: {len(model_info)}')
     if dataset_info_path.exists():
         with jsonlines.open(dataset_info_path, 'r') as reader:
             for line in reader:
                 dataset_info[format_identifier_from_dict(line)] = DatasetExtraInfo.from_dict(line)
+            logger.info(f'Total DatasetExtraInfo: {len(dataset_info)}')
 
     total_errors = 0
     logger.info('Calculate total records...')

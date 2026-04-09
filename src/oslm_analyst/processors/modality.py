@@ -227,13 +227,12 @@ class ModalityAIHelper:
             with jsonlines.open(data_path, 'r') as reader:
                 for line in reader:
                     identifier = format_identifier_from_dict(line)
-                    if line['modality'] is not None:
-                        continue
-                    if identifier in model_info:
-                        line['valid'] = model_info[identifier].valid
-                        line['modality'] = model_info[identifier].modality
-                    else:
-                        model_info[identifier] = ModelExtraInfo.from_dict(line)
+                    if line['modality'] is None:
+                        if identifier in model_info:
+                            line['valid'] = model_info[identifier].valid
+                            line['modality'] = model_info[identifier].modality
+                        else:
+                            model_info[identifier] = ModelExtraInfo.from_dict(line)
                     data.append(line)
             # Write model_info to temp file first
             with tempfile.NamedTemporaryFile(
@@ -271,14 +270,13 @@ class ModalityAIHelper:
             with jsonlines.open(data_path, 'r') as reader:
                 for line in reader:
                     identifier = format_identifier_from_dict(line)
-                    if line['modality'] and line['lifecycle']:
-                        continue
-                    if identifier in dataset_info:
-                        line['valid'] = dataset_info[identifier].valid
-                        line['modality'] = dataset_info[identifier].modality
-                        line['lifecycle'] = dataset_info[identifier].lifecycle
-                    else:
-                        dataset_info[identifier] = DatasetExtraInfo.from_dict(line)
+                    if not (line['modality'] and line['lifecycle']):
+                        if identifier in dataset_info:
+                            line['valid'] = dataset_info[identifier].valid
+                            line['modality'] = dataset_info[identifier].modality
+                            line['lifecycle'] = dataset_info[identifier].lifecycle
+                        else:
+                            dataset_info[identifier] = DatasetExtraInfo.from_dict(line)
                     data.append(line)
             # Write dataset_info to temp file first
             with tempfile.NamedTemporaryFile(
