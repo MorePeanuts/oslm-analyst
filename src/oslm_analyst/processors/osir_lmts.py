@@ -241,6 +241,11 @@ class OsirLmtsProcessor:
         model_infos = []
 
         for identifier, data_points in aggregated.items():
+            # Filter by target_orgs if specified
+            org = self._get_org_for_identifier(identifier)
+            if self.target_orgs and org not in self.target_orgs:
+                continue
+
             total_downloads = 0
             total_likes = 0
             total_discussions = 0
@@ -277,10 +282,10 @@ class OsirLmtsProcessor:
             model_info = ModelInfo(
                 identifier=identifier,
                 date_crawl=date_crawl,
-                downloads_last_month=total_downloads if total_downloads > 0 else None,
-                likes=total_likes if total_likes > 0 else None,
-                discussions=total_discussions if total_discussions > 0 else None,
-                descendants=descendants if descendants > 0 else None,
+                downloads_last_month=total_downloads,
+                likes=total_likes,
+                discussions=total_discussions,
+                descendants=descendants,
                 modality=modality,
             )
             model_infos.append(model_info)
@@ -298,6 +303,11 @@ class OsirLmtsProcessor:
         dataset_infos = []
 
         for identifier, data_points in aggregated.items():
+            # Filter by target_orgs if specified
+            org = self._get_org_for_identifier(identifier)
+            if self.target_orgs and org not in self.target_orgs:
+                continue
+
             total_downloads = 0
             total_likes = 0
             total_discussions = 0
@@ -339,10 +349,10 @@ class OsirLmtsProcessor:
             dataset_info = DatasetInfo(
                 identifier=identifier,
                 date_crawl=date_crawl,
-                downloads_last_month=total_downloads if total_downloads > 0 else None,
-                likes=total_likes if total_likes > 0 else None,
-                discussions=total_discussions if total_discussions > 0 else None,
-                descendants=descendants if descendants > 0 else None,
+                downloads_last_month=total_downloads,
+                likes=total_likes,
+                discussions=total_discussions,
+                descendants=descendants,
                 modality=modality,
                 lifecycle=lifecycle,
             )
@@ -523,9 +533,7 @@ class OsirLmtsProcessor:
         rows = []
         for org_info in self._org_list:
             org = org_info.org
-            if self.target_orgs and org not in self.target_orgs:
-                logger.debug(f'{org} is not in target orgs. skipping.')
-            elif org not in org_data:
+            if org not in org_data:
                 logger.warning(f'{org} not found in data, while found in config.')
             else:
                 row = ModelSummaryRow(org=org, **org_data[org])
@@ -600,9 +608,7 @@ class OsirLmtsProcessor:
         rows = []
         for org_info in self._org_list:
             org = org_info.org
-            if self.target_orgs and org not in self.target_orgs:
-                logger.debug(f'{org} is not in target orgs. skipping.')
-            elif org not in org_data:
+            if org not in org_data:
                 logger.warning(f'{org} not found in data, while found in config.')
             else:
                 row = DatasetSummaryRow(org=org, **org_data[org])
