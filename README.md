@@ -136,6 +136,19 @@ The `osir-lmts-analyst` Claude Code skill provides interactive data analysis cap
 - Generate visualizations (line charts, pie charts, bar charts, radar charts, etc.)
 - Compare monthly changes
 
+#### Quick Demo
+
+1. Launch Claude Code in the project directory
+2. Run the analysis skill with your question:
+   ```
+   /osir-lmts-analyst 你需要询问/分析的问题
+   ```
+
+Example queries:
+- `/osir-lmts-analyst 查看最新月份的模型下载量排名前10`
+- `/osir-lmts-analyst 分析过去6个月语言模型的下载趋势`
+- `/osir-lmts-analyst 对比上个月和本月机构排名的变化`
+
 For the Open Source Influence Ranking of Large Model Technology Stack (OSIR-LMTS), see the [osir_lmts/README.md](osir_lmts/README.md) for detailed documentation in Chinese.
 
 ## License
