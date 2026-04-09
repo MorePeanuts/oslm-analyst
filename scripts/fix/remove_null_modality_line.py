@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Remove lines where modality field is null or "null" from model_data.jsonl.
 Uses tempfile for safe atomic writes.
@@ -128,4 +127,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
