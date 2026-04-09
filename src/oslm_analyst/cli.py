@@ -6,6 +6,7 @@ import sys
 from oslm_analyst.processors.modality import ModalityAIHelper
 from oslm_analyst.processors.osir_lmts import OsirLmtsProcessor
 from oslm_analyst.processors.osir_lmts_rank import get_rank_strategy_for_month
+from oslm_analyst.database.osir_lmts import OsirLmtsDatabase
 import typer
 from typer import Argument, Option
 from typing import Annotated, Literal
@@ -23,6 +24,8 @@ from .crawl import (
 app = typer.Typer(name='OSLM-Analyst', help='Open-source large models data analyst.')
 process_app = typer.Typer(name='Raw-data Processor', help='Post-process the raw data.')
 app.add_typer(process_app, name='process')
+db_app = typer.Typer(name='Database', help='OSIR-LMTS database management.')
+app.add_typer(db_app, name='db')
 
 
 @app.command()
@@ -393,6 +396,108 @@ def report():
     Generate data analysis report.
     """
     raise NotImplementedError()
+
+
+@db_app.command('init')
+def init_db(
+    db_path: Annotated[
+        str,
+        Option(help='Path to the SQLite database file.'),
+    ] = './output/osir_lmts.db',
+    output_root: Annotated[
+        str,
+        Option(help='Root directory containing the osir-lmts output directories.'),
+    ] = './output',
+    config_root: Annotated[
+        str,
+        Option(help='Root directory containing configuration files.'),
+    ] = './config',
+):
+    """
+    Initialize the OSIR-LMTS database from all available osir-lmts_xxx directories.
+
+    This command:
+    1. Creates a new SQLite database (or overwrites if exists)
+    2. Loads organization mappings from config
+    3. Imports data from all osir-lmts_YYYY-MM directories in output_root
+    4. Applies filtering: only target orgs, exclude Evaluation datasets
+    """
+    db = OsirLmtsDatabase(db_path)
+
+    # Remove existing database if it exists
+    db_path_obj = Path(db_path)
+    if db_path_obj.exists():
+        logger.warning(f'Database file already exists, will be overwritten: {db_path}')
+        db_path_obj.unlink()
+
+    db.initialize(output_root=output_root, config_root=config_root)
+
+    # Show summary
+    months = db.get_available_months()
+    logger.info(f'Database initialized successfully at {db_path}')
+    logger.info(f'Available months: {months}')
+
+
+@db_app.command('update')
+def update_db(
+    osir_dir: Annotated[
+        str,
+        Argument(help='Path to the osir-lmts_YYYY-MM directory to import.'),
+    ],
+    db_path: Annotated[
+        str,
+        Option(help='Path to the SQLite database file.'),
+    ] = './output/osir_lmts.db',
+    config_root: Annotated[
+        str,
+        Option(help='Root directory containing configuration files.'),
+    ] = './config',
+):
+    """
+    Update the database with data from a specific osir-lmts_YYYY-MM directory.
+
+    This command:
+    1. Opens an existing database (or creates if doesn't exist)
+    2. Loads organization mappings from config
+    3. Imports or replaces data for the month from the specified directory
+    4. Applies filtering: only target orgs, exclude Evaluation datasets
+    """
+    db = OsirLmtsDatabase(db_path)
+
+    if not Path(db_path).exists():
+        logger.info(f'Creating new database at {db_path}')
+
+    db.update_month(osir_dir=osir_dir, config_root=config_root)
+
+    # Show summary
+    months = db.get_available_months()
+    logger.info(f'Database updated successfully at {db_path}')
+    logger.info(f'Available months: {months}')
+
+
+@db_app.command('list')
+def list_db(
+    db_path: Annotated[
+        str,
+        Option(help='Path to the SQLite database file.'),
+    ] = './output/osir_lmts.db',
+):
+    """
+    List available months in the database.
+    """
+    db = OsirLmtsDatabase(db_path)
+
+    if not Path(db_path).exists():
+        logger.error(f'Database not found: {db_path}')
+        raise typer.Exit(1)
+
+    months = db.get_available_months()
+    logger.info(f'Available months in database:')
+    for month in months:
+        # Count records for this month
+        model_count = sum(1 for _ in db.get_models(month=month))
+        dataset_count = sum(1 for _ in db.get_datasets(month=month))
+        logger.info(f'  {month}: {model_count} models, {dataset_count} datasets')
 
 
 def main() -> None:
