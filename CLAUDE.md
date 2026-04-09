@@ -21,6 +21,8 @@ The pipeline follows this flow: **Configuration → Crawling → Enrichment → 
 | BAAI Crawler | `src/oslm_analyst/crawlers/baai_data.py` | BAAI DataHub web scraper |
 | Modality Processor | `src/oslm_analyst/processors/modality.py` | AI-powered classification via LangChain |
 | Data Structures | `src/oslm_analyst/data_utils.py` | Enums (Modality, Lifecycle) and dataclasses |
+| OSIR-LMTS Database | `src/oslm_analyst/database/osir_lmts.py` | SQLite database for historical data |
+| MCP Server | `src/oslm_analyst/mcp_server.py` | MCP server for safe database access |
 
 ## Setup & Commands
 
@@ -48,6 +50,15 @@ uv run oslm-analyst crawl huggingface id:deepseek-ai/DeepSeek-V3.2-Speciale --ca
 
 # Post-process to add modality/lifecycle classification
 uv run oslm-analyst process gen-modality ./output/huggingface_2026-03-17
+
+# Process OSIR-LMTS aggregated data
+uv run oslm-analyst process osir-lmts
+
+# Database commands
+uv run oslm-analyst db init                    # Initialize database from all osir-lmts directories
+uv run oslm-analyst db update ./output/osir-lmts_2026-03  # Update with specific month
+uv run oslm-analyst db list                    # List available months
+uv run oslm-analyst db mcp                     # Start MCP server
 ```
 
 ## Configuration
@@ -55,12 +66,37 @@ uv run oslm-analyst process gen-modality ./output/huggingface_2026-03-17
 - `config/orgs.yaml` - List of organizations to track (with hf_accounts, ms_accounts)
 - `config/model_info.jsonl` - Persistent model extra info (modality, validity)
 - `config/dataset_info.jsonl` - Persistent dataset extra info (modality, lifecycle, validity)
+- `config/osir_lmts_orgs.json` - List of organizations for OSIR-LMTS ranking
 
 ## Output Format
 
 Raw output is stored as JSONLines in `output/{platform}_{YYYY-MM-DD}/`:
 - `raw_{category}_data.jsonl` - Crawled data
 - `err_{category}_data.jsonl` - Errors (deleted if none)
+
+OSIR-LMTS output is in `output/osir-lmts_{YYYY-MM}/`:
+- `model_data.jsonl` / `dataset_data.jsonl` - Monthly delta data
+- `acc_model_data.jsonl` / `acc_dataset_data.jsonl` - Accumulated data
+- `*_summary.csv` - Summary statistics
+- `*_rank.csv` - Ranking results
+
+## Database
+
+The OSIR-LMTS SQLite database (`output/osir_lmts.db`) stores historical model and dataset data:
+
+- `models` table: Monthly model metrics (downloads, likes, modality, etc.)
+- `datasets` table: Monthly dataset metrics (downloads, likes, modality, lifecycle, etc.)
+
+## MCP Server & Data Analysis Skill
+
+**MCP Server**: Provides safe read-only access to the database via Model Context Protocol. Configured in `.mcp.json`.
+
+**Data Analysis Skill**: The `osir-lmts-analyst` skill (`.claude/skills/osir-lmts-analyst/`) uses the MCP server to:
+- Query download trends and organization rankings
+- Generate visualizations (line charts, pie charts, bar charts, radar charts)
+- Analyze monthly changes
+
+Use this skill when users ask about OSIR-LMTS data analysis.
 
 ## Key Design Patterns
 

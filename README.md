@@ -15,10 +15,12 @@ The project aims to analyze hotspots and development trends in the open-source l
 - **Data Statistics Tools**: Aggregation and processing of crawled data
 - **AI-assisted Modality Generation**: Automatic classification of models and datasets using LLMs
 - **Streamlit Dashboard**: Interactive data visualization interface
+- **OSIR-LMTS Database**: SQLite database for storing historical model/dataset data
+- **MCP Server**: Model Context Protocol server for safe database access
+- **Data Analysis Skill**: Claude Code skill for interactive data analysis
 
 ### In Progress / Planned
 - **Data Analysis Agent**: AI-powered agent for answering questions about the data
-- **Database Setup**: Persistent storage for historical data and efficient querying
 
 ## Installation
 
@@ -50,6 +52,12 @@ uv run oslm-analyst process gen-modality output/baai-datahub_YYYY-MM-DD
 # Process OSIR-LMTS data
 uv run oslm-analyst process osir-lmts
 
+# Database management
+uv run oslm-analyst db init                    # Initialize database from all osir-lmts directories
+uv run oslm-analyst db update ./output/osir-lmts_YYYY-MM  # Update database with specific month
+uv run oslm-analyst db list                    # List available months in database
+uv run oslm-analyst db mcp                     # Start MCP server for database access
+
 # Launch dashboard
 uv run oslm-analyst dashboard
 ```
@@ -58,20 +66,75 @@ uv run oslm-analyst dashboard
 
 ```
 OSLM-Analyst/
-├── config/              # Configuration files
-├── output/              # Output data directory
-├── osir_lmts/           # OSIR-LMTS specific files
-├── scripts/             # Utility scripts
-├── src/oslm_analyst/    # Main source code
-│   ├── crawl.py         # Crawl orchestrator
-│   ├── crawlers/        # Platform-specific crawlers
-│   ├── processors/      # Data processors
-│   ├── ui/              # Streamlit dashboard
-│   └── cli.py           # CLI entrypoint
-└── tests/               # Tests
+├── .claude/skills/         # Claude Code skills
+│   └── osir-lmts-analyst/  # OSIR-LMTS data analysis skill
+├── .mcp.json               # MCP server configuration
+├── config/                 # Configuration files
+├── output/                 # Output data directory
+├── osir_lmts/              # OSIR-LMTS specific files
+├── scripts/                # Utility scripts
+├── src/oslm_analyst/       # Main source code
+│   ├── crawl.py            # Crawl orchestrator
+│   ├── crawlers/           # Platform-specific crawlers
+│   ├── processors/         # Data processors
+│   ├── database/           # Database module
+│   │   └── osir_lmts.py   # OSIR-LMTS database implementation
+│   ├── ui/                 # Streamlit dashboard
+│   ├── mcp_server.py       # MCP server implementation
+│   └── cli.py              # CLI entrypoint
+└── tests/                  # Tests
 ```
 
-## OSIR-LMTS
+## OSIR-LMTS Database
+
+The project includes an SQLite database (`output/osir_lmts.db`) for storing historical model and dataset data.
+
+### Database Schema
+
+**`models` table**
+- `id` (TEXT): Full identifier (org/model-name, primary key)
+- `month` (TEXT): Month in YYYY-MM format (primary key)
+- `org` (TEXT): Organization name
+- `repo` (TEXT): Repository name
+- `name` (TEXT): Model name
+- `modality` (TEXT): Modality (Vision, Language, Speech, 3D, Multimodal, Protein, Vector)
+- `downloads_last_month` (INTEGER): Download count for the month
+- `likes` (INTEGER): Like count
+- `discussions` (INTEGER): Discussion count
+- `descendants` (INTEGER): Descendant model count
+- `date_crawl` (TEXT): Crawl date
+
+**`datasets` table**
+- `id` (TEXT): Full identifier (primary key)
+- `month` (TEXT): Month in YYYY-MM format (primary key)
+- `org` (TEXT): Organization name
+- `repo` (TEXT): Repository name
+- `name` (TEXT): Dataset name
+- `modality` (TEXT): Modality (Language, Speech, Vision, Multimodal, Embodied)
+- `lifecycle` (TEXT): Lifecycle (Pre-training, Fine-tuning, Preference)
+- `downloads_last_month` (INTEGER): Download count for the month
+- `likes` (INTEGER): Like count
+- `discussions` (INTEGER): Discussion count
+- `descendants` (INTEGER): Descendant dataset count
+- `date_crawl` (TEXT): Crawl date
+
+### MCP Server
+
+The project includes an MCP (Model Context Protocol) server that provides safe read-only access to the database. This is configured in `.mcp.json` and used by the `osir-lmts-analyst` skill.
+
+Available MCP tools:
+- `query_osir_lmts_db`: Execute read-only SQL queries
+- `get_db_schema`: Get database schema information
+- `get_available_months`: Get list of available months
+- `get_latest_month`: Get the latest month
+
+### Data Analysis Skill
+
+The `osir-lmts-analyst` Claude Code skill provides interactive data analysis capabilities:
+- Query download trends over time
+- Analyze organization rankings
+- Generate visualizations (line charts, pie charts, bar charts, radar charts, etc.)
+- Compare monthly changes
 
 For the Open Source Influence Ranking of Large Model Technology Stack (OSIR-LMTS), see the [osir_lmts/README.md](osir_lmts/README.md) for detailed documentation in Chinese.
 
