@@ -5087,3 +5087,12 @@
 {"repo": "tencent-community", "name": "RVMS-Bench", "modality": null, "lifecycle": null, "valid": false, "link": "https://modelscope.cn/datasets/tencent-community/RVMS-Bench"}
 {"repo": "tencent-community", "name": "Penguin-Recap-I", "modality": null, "lifecycle": null, "valid": false, "link": "https://modelscope.cn/datasets/tencent-community/Penguin-Recap-I"}
 {"repo": "tencent-community", "name": "Penguin-Recap-V", "modality": null, "lifecycle": null, "valid": false, "link": "https://modelscope.cn/datasets/tencent-community/Penguin-Recap-V"}
+{"repo": "facebook", "name": "gistbench", "modality": null, "lifecycle": null, "valid": false, "link": "https://huggingface.co/datasets/facebook/gistbench"}
+{"repo": "RoboCOIN", "name": "Agilex_Cobot_Magic_move_object", "modality": null, "lifecycle": null, "valid": false, "link": "https://huggingface.co/datasets/RoboCOIN/Agilex_Cobot_Magic_move_object"}
+{"repo": "RoboCOIN", "name": "Agilex_Cobot_Magic_stack_block", "modality": null, "lifecycle": null, "valid": false, "link": "https://huggingface.co/datasets/RoboCOIN/Agilex_Cobot_Magic_stack_block"}
+{"repo": "OpenDriveLab", "name": "WorldEngine", "modality": null, "lifecycle": null, "valid": false, "link": "https://huggingface.co/datasets/OpenDriveLab/WorldEngine"}
+{"repo": "microsoft", "name": "OpenMementos", "modality": null, "lifecycle": null, "valid": false, "link": "https://huggingface.co/datasets/microsoft/OpenMementos"}
+{"repo": "allenai", "name": "WildDet3D-Data", "modality": null, "lifecycle": null, "valid": false, "link": "https://huggingface.co/datasets/allenai/WildDet3D-Data"}
+{"repo": "allenai", "name": "WildDet3D-Stereo4D-Bench", "modality": null, "lifecycle": null, "valid": false, "link": "https://huggingface.co/datasets/allenai/WildDet3D-Stereo4D-Bench"}
+{"repo": "allenai", "name": "WildDet3D-Bench", "modality": null, "lifecycle": null, "valid": false, "link": "https://huggingface.co/datasets/allenai/WildDet3D-Bench"}
+{"repo": "allenai", "name": "WildDet3D-visualization-source", "modality": null, "lifecycle": null, "valid": false, "link": "https://huggingface.co/datasets/allenai/WildDet3D-visualization-source"}
