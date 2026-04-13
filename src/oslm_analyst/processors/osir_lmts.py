@@ -533,6 +533,8 @@ class OsirLmtsProcessor:
         rows = []
         for org_info in self._org_list:
             org = org_info.org
+            if self.target_orgs and org not in self.target_orgs:
+                continue
             if org not in org_data:
                 logger.warning(f'{org} not found in data, while found in config.')
             else:
@@ -608,6 +610,8 @@ class OsirLmtsProcessor:
         rows = []
         for org_info in self._org_list:
             org = org_info.org
+            if self.target_orgs and org not in self.target_orgs:
+                continue
             if org not in org_data:
                 logger.warning(f'{org} not found in data, while found in config.')
             else:

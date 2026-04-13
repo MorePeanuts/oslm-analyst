@@ -138,6 +138,8 @@ The `osir-lmts-analyst` Claude Code skill provides interactive data analysis cap
 
 #### Quick Demo
 
+> Make sure you have initialized the osir-lmts database using the command `uv run oslm-analyst db init`
+
 1. Launch Claude Code in the project directory
 2. Run the analysis skill with your question:
    ```
@@ -150,7 +152,3 @@ Example queries:
 - `/osir-lmts-analyst 对比上个月和本月机构排名的变化`
 
 For the Open Source Influence Ranking of Large Model Technology Stack (OSIR-LMTS), see the [osir_lmts/README.md](osir_lmts/README.md) for detailed documentation in Chinese.
-
-## License
-
-TBD
